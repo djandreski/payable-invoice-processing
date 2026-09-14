@@ -1,0 +1,6 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <AssemblyName>InvoiceReviewAssistant.Core</AssemblyName>
+    <RootNamespace>InvoiceReviewAssistant.Core</RootNamespace>
+  </PropertyGroup>
+</Project>

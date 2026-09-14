@@ -1,0 +1,26 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <AssemblyName>InvoiceReviewAssistant.Infrastructure</AssemblyName>
+    <RootNamespace>InvoiceReviewAssistant.Infrastructure</RootNamespace>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\InvoiceReviewAssistant.Core\InvoiceReviewAssistant.Core.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="JsonSchema.Net" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Design" PrivateAssets="all" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" />
+    <PackageReference Include="OpenAI" />
+    <PackageReference Include="PDFtoImage" />
+    <PackageReference Include="PdfPig" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Content Include="Extraction\Schemas\invoice_extraction_v1.schema.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <TargetPath>Schemas\invoice_extraction_v1.schema.json</TargetPath>
+    </Content>
+  </ItemGroup>
+</Project>

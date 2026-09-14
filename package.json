@@ -1,0 +1,11 @@
+{
+  "name": "invoice-review-assistant",
+  "private": true,
+  "scripts": {
+    "restore": "dotnet restore InvoiceReviewAssistant.sln && npm ci --prefix src/invoice-review-client",
+    "build": "dotnet build InvoiceReviewAssistant.sln --no-restore && npm run build --prefix src/invoice-review-client",
+    "test": "dotnet test InvoiceReviewAssistant.sln --no-build && npm run test --prefix src/invoice-review-client",
+    "contracts:generate": "node scripts/generate-contract.mjs",
+    "contracts:check": "node scripts/generate-contract.mjs --check"
+  }
+}

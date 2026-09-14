@@ -1,0 +1,143 @@
+{
+  "type": "object",
+  "properties": {
+    "schemaVersion": {
+      "type": "string",
+      "enum": ["1.0"]
+    },
+    "supplier": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "$ref": "#/$defs/nullableTextField"
+        },
+        "registrationId": {
+          "$ref": "#/$defs/nullableTextField"
+        }
+      },
+      "required": ["name", "registrationId"],
+      "additionalProperties": false
+    },
+    "reference": {
+      "type": "object",
+      "properties": {
+        "invoiceNumber": {
+          "$ref": "#/$defs/nullableTextField"
+        },
+        "purchaseOrderNumber": {
+          "$ref": "#/$defs/nullableTextField"
+        }
+      },
+      "required": ["invoiceNumber", "purchaseOrderNumber"],
+      "additionalProperties": false
+    },
+    "datesAndTerms": {
+      "type": "object",
+      "properties": {
+        "invoiceDate": {
+          "$ref": "#/$defs/nullableDateField"
+        },
+        "dueDate": {
+          "$ref": "#/$defs/nullableDateField"
+        },
+        "paymentTerms": {
+          "$ref": "#/$defs/nullableTextField"
+        }
+      },
+      "required": ["invoiceDate", "dueDate", "paymentTerms"],
+      "additionalProperties": false
+    },
+    "amounts": {
+      "type": "object",
+      "properties": {
+        "currency": {
+          "$ref": "#/$defs/nullableCurrencyField"
+        },
+        "subtotal": {
+          "$ref": "#/$defs/nullableMoneyField"
+        },
+        "taxAmount": {
+          "$ref": "#/$defs/nullableMoneyField"
+        },
+        "total": {
+          "$ref": "#/$defs/nullableMoneyField"
+        }
+      },
+      "required": ["currency", "subtotal", "taxAmount", "total"],
+      "additionalProperties": false
+    }
+  },
+  "required": [
+    "schemaVersion",
+    "supplier",
+    "reference",
+    "datesAndTerms",
+    "amounts"
+  ],
+  "additionalProperties": false,
+  "$defs": {
+    "nullableTextField": {
+      "type": "object",
+      "properties": {
+        "value": {
+          "type": ["string", "null"]
+        },
+        "confidence": {
+          "type": ["number", "null"],
+          "minimum": 0,
+          "maximum": 1
+        }
+      },
+      "required": ["value", "confidence"],
+      "additionalProperties": false
+    },
+    "nullableDateField": {
+      "type": "object",
+      "properties": {
+        "value": {
+          "type": ["string", "null"],
+          "format": "date"
+        },
+        "confidence": {
+          "type": ["number", "null"],
+          "minimum": 0,
+          "maximum": 1
+        }
+      },
+      "required": ["value", "confidence"],
+      "additionalProperties": false
+    },
+    "nullableCurrencyField": {
+      "type": "object",
+      "properties": {
+        "value": {
+          "type": ["string", "null"],
+          "pattern": "^[A-Z]{3}$"
+        },
+        "confidence": {
+          "type": ["number", "null"],
+          "minimum": 0,
+          "maximum": 1
+        }
+      },
+      "required": ["value", "confidence"],
+      "additionalProperties": false
+    },
+    "nullableMoneyField": {
+      "type": "object",
+      "properties": {
+        "value": {
+          "type": ["string", "null"],
+          "pattern": "^-?(?:0|[1-9]\\d{0,26})\\.\\d{2}$"
+        },
+        "confidence": {
+          "type": ["number", "null"],
+          "minimum": 0,
+          "maximum": 1
+        }
+      },
+      "required": ["value", "confidence"],
+      "additionalProperties": false
+    }
+  }
+}

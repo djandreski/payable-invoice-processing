@@ -1,0 +1,56 @@
+# IDE and operating-system files
+.vs/
+.vscode/
+.idea/
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+.DS_Store
+Thumbs.db
+
+# Build, test, and frontend output
+[Bb]in/
+[Oo]bj/
+[Tt]est[Rr]esults/
+coverage/
+*.trx
+*.coverage
+*.coveragexml
+node_modules/
+dist/
+.vite/
+playwright-report/
+test-results/
+
+# Local configuration and credentials
+.env
+.env.*
+!.env.example
+appsettings.*.json
+!appsettings.Development.example.json
+secrets.json
+*.key
+*.pem
+*.pfx
+
+# Local data and provider artifacts. Committed synthetic test fixtures must be
+# explicitly added by their owning task.
+*.db
+*.db-shm
+*.db-wal
+*.sqlite
+*.sqlite3
+*.pdf
+storage/
+staging/
+quarantine/
+temp/
+artifacts/
+generated/
+!src/invoice-review-client/src/api/generated/
+!src/invoice-review-client/src/api/generated/**/*.ts
+local-data/
+*.prompt.json
+*.response.json
+*.provider.json

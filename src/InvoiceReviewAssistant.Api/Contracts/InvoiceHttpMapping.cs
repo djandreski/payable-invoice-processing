@@ -43,7 +43,16 @@ public static class InvoiceHttpMapping
     };
 
     public static InvoiceDecisionDto ToDto(this Domain.InvoiceDecision decision) => new() { Kind = (DecisionKind)(int)decision.Kind, DecidedAt = decision.DecidedAtUtc, RejectionReason = decision.RejectionReason };
-    public static FieldCorrectionDto ToDto(this Domain.FieldCorrection correction) => new() { Id = correction.Id?.Value ?? throw new InvalidOperationException("Persisted corrections require an ID."), AuditEventId = correction.AuditEventId?.Value ?? throw new InvalidOperationException("Persisted corrections require an audit event ID."), Field = (InvoiceFieldKey)(int)correction.Field, PreviousValue = correction.PreviousValue.Value, NewValue = correction.NewValue.Value, DraftVersion = correction.DraftVersion.Value, OccurredAt = correction.OccurredAtUtc };
+    public static FieldCorrectionDto ToDto(this Domain.FieldCorrection correction) => new()
+    {
+        Id = (correction.Id?.Value ?? throw new InvalidOperationException("Persisted corrections require an ID.")).ToString(System.Globalization.CultureInfo.InvariantCulture),
+        AuditEventId = (correction.AuditEventId?.Value ?? throw new InvalidOperationException("Persisted corrections require an audit event ID.")).ToString(System.Globalization.CultureInfo.InvariantCulture),
+        Field = (InvoiceFieldKey)(int)correction.Field,
+        PreviousValue = correction.PreviousValue.Value,
+        NewValue = correction.NewValue.Value,
+        DraftVersion = correction.DraftVersion.Value,
+        OccurredAt = correction.OccurredAtUtc
+    };
 
     public static InvoiceDetailDto ToDto(
         this Domain.Invoice invoice,

@@ -3,13 +3,19 @@ using InvoiceReviewAssistant.Api.Controllers;
 using InvoiceReviewAssistant.Core.Ingestion;
 using InvoiceReviewAssistant.Core.Invoices;
 using InvoiceReviewAssistant.Infrastructure.Configuration;
+using InvoiceReviewAssistant.Infrastructure.Approval;
+using InvoiceReviewAssistant.Infrastructure.Decisions;
 using InvoiceReviewAssistant.Infrastructure.Documents;
+using InvoiceReviewAssistant.Infrastructure.Drafts;
 using InvoiceReviewAssistant.Infrastructure.Extraction;
 using InvoiceReviewAssistant.Infrastructure.Ingestion;
 using InvoiceReviewAssistant.Infrastructure.Ocr;
 using InvoiceReviewAssistant.Infrastructure.Pdf;
 using InvoiceReviewAssistant.Infrastructure.Persistence;
+using InvoiceReviewAssistant.Infrastructure.Queue;
+using InvoiceReviewAssistant.Infrastructure.Queries;
 using InvoiceReviewAssistant.Infrastructure.Reconciliation;
+using InvoiceReviewAssistant.Infrastructure.Validation;
 using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.EntityFrameworkCore;
 #pragma warning disable OPENAI001
@@ -53,6 +59,12 @@ builder.Services.AddNativePdfTextPath();
 builder.Services.AddPdfRenderingAndOcr();
 builder.Services.AddStartupReconciliation();
 builder.Services.AddInvoiceIngestion();
+builder.Services.AddInvoiceDraftSaving();
+builder.Services.AddExplicitInvoiceValidation();
+builder.Services.AddInvoiceApproval();
+builder.Services.AddInvoiceRejection();
+builder.Services.AddInvoiceQueue();
+builder.Services.AddInvoiceReadApis();
 builder.Services.AddScoped<EfInvoiceDocumentLookup>();
 builder.Services.AddSingleton<InvoiceExtractionSchema>(serviceProvider =>
     new InvoiceExtractionSchemaLoader()

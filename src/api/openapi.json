@@ -10,14 +10,3180 @@
     }
   ],
   "paths": {
-    "/health": {
+    "/api/invoices/{id}/approve": {
+      "post": {
+        "tags": [
+          "InvoiceApproval"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ApproveInvoiceRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/InvoiceDetailDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/InvoiceProblemDetails"
+                }
+              }
+            },
+            "headers": {
+              "X-Correlation-ID": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/InvoiceProblemDetails"
+                }
+              }
+            },
+            "headers": {
+              "X-Correlation-ID": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Conflict",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/InvoiceProblemDetails"
+                }
+              }
+            },
+            "headers": {
+              "X-Correlation-ID": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/InvoiceProblemDetails"
+                }
+              }
+            },
+            "headers": {
+              "X-Correlation-ID": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        },
+        "operationId": "approveInvoice"
+      }
+    },
+    "/api/invoices/{id}": {
       "get": {
         "tags": [
-          "InvoiceReviewAssistant.Api"
+          "InvoiceDetails"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$"
+            }
+          }
         ],
         "responses": {
           "200": {
-            "description": "OK"
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/InvoiceDetailDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/InvoiceProblemDetails"
+                }
+              }
+            },
+            "headers": {
+              "X-Correlation-ID": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/InvoiceProblemDetails"
+                }
+              }
+            },
+            "headers": {
+              "X-Correlation-ID": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/InvoiceProblemDetails"
+                }
+              }
+            },
+            "headers": {
+              "X-Correlation-ID": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        },
+        "operationId": "getInvoice"
+      }
+    },
+    "/api/invoices/{id}/document": {
+      "get": {
+        "tags": [
+          "InvoiceDocuments"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/pdf": {
+                "schema": {
+                  "type": "string",
+                  "format": "binary"
+                }
+              }
+            }
+          },
+          "206": {
+            "description": "Partial Content",
+            "content": {
+              "application/pdf": {
+                "schema": {
+                  "type": "string",
+                  "format": "binary"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/InvoiceProblemDetails"
+                }
+              }
+            },
+            "headers": {
+              "X-Correlation-ID": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/InvoiceProblemDetails"
+                }
+              }
+            },
+            "headers": {
+              "X-Correlation-ID": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "416": {
+            "description": "Range Not Satisfiable"
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/InvoiceProblemDetails"
+                }
+              }
+            },
+            "headers": {
+              "X-Correlation-ID": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        },
+        "operationId": "getInvoiceDocument"
+      }
+    },
+    "/api/invoices/{id}/draft": {
+      "put": {
+        "tags": [
+          "InvoiceDrafts"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SaveInvoiceDraftRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/InvoiceDetailDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/InvoiceProblemDetails"
+                }
+              }
+            },
+            "headers": {
+              "X-Correlation-ID": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/InvoiceProblemDetails"
+                }
+              }
+            },
+            "headers": {
+              "X-Correlation-ID": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Conflict",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/InvoiceProblemDetails"
+                }
+              }
+            },
+            "headers": {
+              "X-Correlation-ID": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/InvoiceProblemDetails"
+                }
+              }
+            },
+            "headers": {
+              "X-Correlation-ID": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        },
+        "operationId": "saveInvoiceDraft"
+      }
+    },
+    "/api/invoices/{id}/export": {
+      "get": {
+        "tags": [
+          "InvoiceExports"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/InvoiceExportV1Dto"
+                }
+              }
+            },
+            "headers": {
+              "Content-Disposition": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/InvoiceProblemDetails"
+                }
+              }
+            },
+            "headers": {
+              "X-Correlation-ID": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/InvoiceProblemDetails"
+                }
+              }
+            },
+            "headers": {
+              "X-Correlation-ID": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Conflict",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/InvoiceProblemDetails"
+                }
+              }
+            },
+            "headers": {
+              "X-Correlation-ID": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/InvoiceProblemDetails"
+                }
+              }
+            },
+            "headers": {
+              "X-Correlation-ID": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        },
+        "operationId": "exportInvoice"
+      }
+    },
+    "/api/invoices/{id}/history": {
+      "get": {
+        "tags": [
+          "InvoiceHistory"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "minimum": 1,
+              "default": 1
+            }
+          },
+          {
+            "name": "pageSize",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "minimum": 1,
+              "maximum": 100,
+              "default": 50
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AuditHistoryPageDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/InvoiceProblemDetails"
+                }
+              }
+            },
+            "headers": {
+              "X-Correlation-ID": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/InvoiceProblemDetails"
+                }
+              }
+            },
+            "headers": {
+              "X-Correlation-ID": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/InvoiceProblemDetails"
+                }
+              }
+            },
+            "headers": {
+              "X-Correlation-ID": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        },
+        "operationId": "getInvoiceHistory"
+      }
+    },
+    "/api/invoices": {
+      "get": {
+        "tags": [
+          "InvoiceQueue"
+        ],
+        "parameters": [
+          {
+            "name": "search",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "status",
+            "in": "query",
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/components/schemas/InvoiceStatus"
+              }
+            },
+            "style": "form",
+            "explode": true
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "minimum": 1,
+              "default": 1
+            }
+          },
+          {
+            "name": "pageSize",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "minimum": 1,
+              "maximum": 100,
+              "default": 25
+            }
+          },
+          {
+            "name": "sort",
+            "in": "query",
+            "schema": {
+              "$ref": "#/components/schemas/InvoiceSort",
+              "default": "updatedAtDesc"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/InvoiceQueuePageDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/InvoiceProblemDetails"
+                }
+              }
+            },
+            "headers": {
+              "X-Correlation-ID": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/InvoiceProblemDetails"
+                }
+              }
+            },
+            "headers": {
+              "X-Correlation-ID": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        },
+        "operationId": "listInvoices"
+      },
+      "post": {
+        "tags": [
+          "InvoiceUploads"
+        ],
+        "responses": {
+          "201": {
+            "description": "Created",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/InvoiceDetailDto"
+                }
+              }
+            },
+            "headers": {
+              "Location": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/InvoiceProblemDetails"
+                }
+              }
+            },
+            "headers": {
+              "X-Correlation-ID": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "413": {
+            "description": "Payload Too Large",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/InvoiceProblemDetails"
+                }
+              }
+            },
+            "headers": {
+              "X-Correlation-ID": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/InvoiceProblemDetails"
+                }
+              }
+            },
+            "headers": {
+              "X-Correlation-ID": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        },
+        "operationId": "uploadInvoice",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "file": {
+                    "type": "string",
+                    "format": "binary"
+                  }
+                },
+                "required": [
+                  "file"
+                ],
+                "additionalProperties": false
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/invoices/{id}/reject": {
+      "post": {
+        "tags": [
+          "InvoiceRejections"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RejectInvoiceRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/InvoiceDetailDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/InvoiceProblemDetails"
+                }
+              }
+            },
+            "headers": {
+              "X-Correlation-ID": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/InvoiceProblemDetails"
+                }
+              }
+            },
+            "headers": {
+              "X-Correlation-ID": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Conflict",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/InvoiceProblemDetails"
+                }
+              }
+            },
+            "headers": {
+              "X-Correlation-ID": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/InvoiceProblemDetails"
+                }
+              }
+            },
+            "headers": {
+              "X-Correlation-ID": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        },
+        "operationId": "rejectInvoice"
+      }
+    },
+    "/api/invoices/{id}/validate": {
+      "post": {
+        "tags": [
+          "InvoiceValidation"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ValidateInvoiceRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/InvoiceDetailDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/InvoiceProblemDetails"
+                }
+              }
+            },
+            "headers": {
+              "X-Correlation-ID": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/InvoiceProblemDetails"
+                }
+              }
+            },
+            "headers": {
+              "X-Correlation-ID": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Conflict",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/InvoiceProblemDetails"
+                }
+              }
+            },
+            "headers": {
+              "X-Correlation-ID": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/InvoiceProblemDetails"
+                }
+              }
+            },
+            "headers": {
+              "X-Correlation-ID": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        },
+        "operationId": "validateInvoice"
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "AmountDraftDto": {
+        "required": [
+          "currency",
+          "subtotal",
+          "taxAmount",
+          "total"
+        ],
+        "type": "object",
+        "properties": {
+          "currency": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "subtotal": {
+            "type": [
+              "null",
+              "string"
+            ],
+            "pattern": "^-?(?:0|[1-9]\\d{0,26})\\.\\d{2}$"
+          },
+          "taxAmount": {
+            "type": [
+              "null",
+              "string"
+            ],
+            "pattern": "^-?(?:0|[1-9]\\d{0,26})\\.\\d{2}$"
+          },
+          "total": {
+            "type": [
+              "null",
+              "string"
+            ],
+            "pattern": "^-?(?:0|[1-9]\\d{0,26})\\.\\d{2}$"
+          }
+        },
+        "additionalProperties": false
+      },
+      "AmountFieldsDto": {
+        "required": [
+          "currency",
+          "subtotal",
+          "taxAmount",
+          "total"
+        ],
+        "type": "object",
+        "properties": {
+          "currency": {
+            "$ref": "#/components/schemas/TextFieldDto"
+          },
+          "subtotal": {
+            "$ref": "#/components/schemas/MoneyFieldDto"
+          },
+          "taxAmount": {
+            "$ref": "#/components/schemas/MoneyFieldDto"
+          },
+          "total": {
+            "$ref": "#/components/schemas/MoneyFieldDto"
+          }
+        },
+        "additionalProperties": false
+      },
+      "ApproveInvoiceRequest": {
+        "required": [
+          "expectedVersion"
+        ],
+        "type": "object",
+        "properties": {
+          "expectedVersion": {
+            "maximum": 2147483647,
+            "minimum": 1,
+            "type": "integer",
+            "format": "int32"
+          }
+        },
+        "additionalProperties": false
+      },
+      "AuditHistoryPageDto": {
+        "required": [
+          "items",
+          "page",
+          "pageSize",
+          "totalItems",
+          "totalPages",
+          "hasPreviousPage",
+          "hasNextPage"
+        ],
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/AuditEventDto"
+            }
+          },
+          "page": {
+            "type": "integer",
+            "format": "int32",
+            "minimum": 1
+          },
+          "pageSize": {
+            "type": "integer",
+            "format": "int32",
+            "minimum": 1
+          },
+          "totalItems": {
+            "type": "integer",
+            "format": "int32",
+            "minimum": 0
+          },
+          "totalPages": {
+            "type": "integer",
+            "format": "int32",
+            "minimum": 0
+          },
+          "hasPreviousPage": {
+            "type": "boolean"
+          },
+          "hasNextPage": {
+            "type": "boolean"
+          }
+        },
+        "additionalProperties": false
+      },
+      "ConfidenceBand": {
+        "type": "string",
+        "enum": [
+          "high",
+          "medium",
+          "low",
+          "unknown"
+        ]
+      },
+      "DateFieldDto": {
+        "required": [
+          "value",
+          "originalValue",
+          "originalSource",
+          "currentSource",
+          "confidence",
+          "confidenceBand",
+          "differsFromOriginal",
+          "lastCorrectedAt"
+        ],
+        "type": "object",
+        "properties": {
+          "value": {
+            "type": [
+              "null",
+              "string"
+            ],
+            "format": "date"
+          },
+          "originalValue": {
+            "type": [
+              "null",
+              "string"
+            ],
+            "format": "date"
+          },
+          "originalSource": {
+            "$ref": "#/components/schemas/FieldSource"
+          },
+          "currentSource": {
+            "$ref": "#/components/schemas/FieldSource"
+          },
+          "confidence": {
+            "type": [
+              "null",
+              "number"
+            ],
+            "format": "double",
+            "minimum": 0,
+            "maximum": 1
+          },
+          "confidenceBand": {
+            "$ref": "#/components/schemas/ConfidenceBand"
+          },
+          "differsFromOriginal": {
+            "type": "boolean"
+          },
+          "lastCorrectedAt": {
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "type": "string",
+                "format": "date-time",
+                "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}\\.\\d{3}Z$"
+              }
+            ]
+          }
+        },
+        "additionalProperties": false
+      },
+      "DatesAndTermsDraftDto": {
+        "required": [
+          "invoiceDate",
+          "dueDate",
+          "paymentTerms"
+        ],
+        "type": "object",
+        "properties": {
+          "invoiceDate": {
+            "type": [
+              "null",
+              "string"
+            ],
+            "format": "date"
+          },
+          "dueDate": {
+            "type": [
+              "null",
+              "string"
+            ],
+            "format": "date"
+          },
+          "paymentTerms": {
+            "type": [
+              "null",
+              "string"
+            ]
+          }
+        },
+        "additionalProperties": false
+      },
+      "DatesAndTermsFieldsDto": {
+        "required": [
+          "invoiceDate",
+          "dueDate",
+          "paymentTerms",
+          "normalizedPaymentTermsDays"
+        ],
+        "type": "object",
+        "properties": {
+          "invoiceDate": {
+            "$ref": "#/components/schemas/DateFieldDto"
+          },
+          "dueDate": {
+            "$ref": "#/components/schemas/DateFieldDto"
+          },
+          "paymentTerms": {
+            "$ref": "#/components/schemas/TextFieldDto"
+          },
+          "normalizedPaymentTermsDays": {
+            "type": [
+              "null",
+              "integer"
+            ],
+            "format": "int32"
+          }
+        },
+        "additionalProperties": false
+      },
+      "DecisionKind": {
+        "type": "string",
+        "enum": [
+          "approved",
+          "rejected"
+        ]
+      },
+      "DocumentIntegrityStatus": {
+        "type": "string",
+        "enum": [
+          "available",
+          "missing",
+          "corrupt"
+        ]
+      },
+      "DocumentTextSource": {
+        "type": "string",
+        "enum": [
+          "nativeText",
+          "ocr"
+        ]
+      },
+      "FieldCorrectionDto": {
+        "required": [
+          "id",
+          "auditEventId",
+          "field",
+          "previousValue",
+          "newValue",
+          "draftVersion",
+          "occurredAt"
+        ],
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^(?:0|[1-9]\\d*)$"
+          },
+          "auditEventId": {
+            "type": "string",
+            "pattern": "^(?:0|[1-9]\\d*)$"
+          },
+          "field": {
+            "$ref": "#/components/schemas/InvoiceFieldKey"
+          },
+          "previousValue": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "newValue": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "draftVersion": {
+            "type": "integer",
+            "format": "int32",
+            "minimum": 1
+          },
+          "occurredAt": {
+            "type": "string",
+            "format": "date-time",
+            "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}\\.\\d{3}Z$"
+          }
+        },
+        "additionalProperties": false
+      },
+      "FieldSource": {
+        "type": "string",
+        "enum": [
+          "nativeText",
+          "ocr",
+          "aiInference",
+          "reviewer"
+        ]
+      },
+      "InvoiceDecisionDto": {
+        "required": [
+          "kind",
+          "decidedAt",
+          "rejectionReason"
+        ],
+        "type": "object",
+        "properties": {
+          "kind": {
+            "$ref": "#/components/schemas/DecisionKind"
+          },
+          "decidedAt": {
+            "type": "string",
+            "format": "date-time",
+            "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}\\.\\d{3}Z$"
+          },
+          "rejectionReason": {
+            "type": [
+              "null",
+              "string"
+            ]
+          }
+        },
+        "additionalProperties": false
+      },
+      "InvoiceDetailDto": {
+        "required": [
+          "id",
+          "status",
+          "draftVersion",
+          "lastValidatedVersion",
+          "createdAt",
+          "updatedAt",
+          "document",
+          "documentTextSource",
+          "fields",
+          "reviewNotes",
+          "summary",
+          "currentValidation",
+          "corrections",
+          "processingFailure",
+          "decision"
+        ],
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$"
+          },
+          "status": {
+            "$ref": "#/components/schemas/InvoiceStatus"
+          },
+          "draftVersion": {
+            "type": "integer",
+            "format": "int32",
+            "minimum": 1
+          },
+          "lastValidatedVersion": {
+            "type": [
+              "null",
+              "integer"
+            ],
+            "format": "int32",
+            "minimum": 1
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time",
+            "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}\\.\\d{3}Z$"
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time",
+            "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}\\.\\d{3}Z$"
+          },
+          "document": {
+            "$ref": "#/components/schemas/InvoiceDocumentDto"
+          },
+          "documentTextSource": {
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "$ref": "#/components/schemas/DocumentTextSource"
+              }
+            ]
+          },
+          "fields": {
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "$ref": "#/components/schemas/InvoiceFieldsDto"
+              }
+            ]
+          },
+          "reviewNotes": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "summary": {
+            "$ref": "#/components/schemas/InvoiceSummaryDto"
+          },
+          "currentValidation": {
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "$ref": "#/components/schemas/ValidationRunDto"
+              }
+            ]
+          },
+          "corrections": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/FieldCorrectionDto"
+            }
+          },
+          "processingFailure": {
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "$ref": "#/components/schemas/ProcessingFailureDto"
+              }
+            ]
+          },
+          "decision": {
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "$ref": "#/components/schemas/InvoiceDecisionDto"
+              }
+            ]
+          }
+        },
+        "additionalProperties": false
+      },
+      "InvoiceDocumentDto": {
+        "required": [
+          "originalFilename",
+          "mediaType",
+          "byteLength",
+          "sha256",
+          "pageCount",
+          "integrityStatus"
+        ],
+        "type": "object",
+        "properties": {
+          "originalFilename": {
+            "type": "string"
+          },
+          "mediaType": {
+            "type": "string",
+            "enum": [
+              "application/pdf"
+            ]
+          },
+          "byteLength": {
+            "type": "integer",
+            "format": "int64",
+            "minimum": 1
+          },
+          "sha256": {
+            "type": "string",
+            "pattern": "^[0-9a-f]{64}$"
+          },
+          "pageCount": {
+            "type": "integer",
+            "format": "int32",
+            "minimum": 1
+          },
+          "integrityStatus": {
+            "$ref": "#/components/schemas/DocumentIntegrityStatus"
+          }
+        },
+        "additionalProperties": false
+      },
+      "InvoiceDraftInputDto": {
+        "required": [
+          "supplier",
+          "reference",
+          "datesAndTerms",
+          "amounts",
+          "reviewNotes"
+        ],
+        "type": "object",
+        "properties": {
+          "supplier": {
+            "$ref": "#/components/schemas/SupplierDraftDto"
+          },
+          "reference": {
+            "$ref": "#/components/schemas/ReferenceDraftDto"
+          },
+          "datesAndTerms": {
+            "$ref": "#/components/schemas/DatesAndTermsDraftDto"
+          },
+          "amounts": {
+            "$ref": "#/components/schemas/AmountDraftDto"
+          },
+          "reviewNotes": {
+            "type": [
+              "null",
+              "string"
+            ]
+          }
+        },
+        "additionalProperties": false
+      },
+      "InvoiceExportV1Dto": {
+        "required": [
+          "schemaVersion",
+          "invoice",
+          "auditHistory"
+        ],
+        "type": "object",
+        "properties": {
+          "schemaVersion": {
+            "type": "string",
+            "enum": [
+              "1.0"
+            ]
+          },
+          "invoice": {
+            "$ref": "#/components/schemas/InvoiceDetailDto"
+          },
+          "auditHistory": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/AuditEventDto"
+            }
+          }
+        },
+        "additionalProperties": false
+      },
+      "InvoiceFieldKey": {
+        "type": "string",
+        "enum": [
+          "supplierName",
+          "supplierRegistrationId",
+          "invoiceNumber",
+          "purchaseOrderNumber",
+          "invoiceDate",
+          "dueDate",
+          "paymentTerms",
+          "currency",
+          "subtotal",
+          "taxAmount",
+          "total",
+          "reviewNotes"
+        ]
+      },
+      "InvoiceFieldsDto": {
+        "required": [
+          "supplier",
+          "reference",
+          "datesAndTerms",
+          "amounts"
+        ],
+        "type": "object",
+        "properties": {
+          "supplier": {
+            "$ref": "#/components/schemas/SupplierFieldsDto"
+          },
+          "reference": {
+            "$ref": "#/components/schemas/ReferenceFieldsDto"
+          },
+          "datesAndTerms": {
+            "$ref": "#/components/schemas/DatesAndTermsFieldsDto"
+          },
+          "amounts": {
+            "$ref": "#/components/schemas/AmountFieldsDto"
+          }
+        },
+        "additionalProperties": false
+      },
+      "InvoiceProblemDetails": {
+        "type": "object",
+        "properties": {
+          "type": {
+            "type": "string",
+            "format": "uri"
+          },
+          "title": {
+            "type": "string"
+          },
+          "status": {
+            "type": "integer",
+            "format": "int32",
+            "minimum": 100
+          },
+          "detail": {
+            "type": "string"
+          },
+          "instance": {
+            "type": "string"
+          },
+          "code": {
+            "type": "string"
+          },
+          "correlationId": {
+            "type": "string"
+          },
+          "fields": {
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "type": "object",
+                "additionalProperties": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                }
+              }
+            ]
+          },
+          "currentVersion": {
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "type": "integer",
+                "format": "int32",
+                "minimum": 1
+              }
+            ]
+          }
+        },
+        "required": [
+          "type",
+          "title",
+          "status",
+          "detail",
+          "instance",
+          "code",
+          "correlationId",
+          "fields",
+          "currentVersion"
+        ],
+        "additionalProperties": false
+      },
+      "InvoiceQueueItemDto": {
+        "required": [
+          "id",
+          "status",
+          "supplierName",
+          "invoiceNumber",
+          "invoiceDate",
+          "total",
+          "currency",
+          "draftVersion",
+          "warningCount",
+          "errorCount",
+          "exceptionCount",
+          "processingFailure",
+          "createdAt",
+          "updatedAt"
+        ],
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "status": {
+            "$ref": "#/components/schemas/InvoiceStatus"
+          },
+          "supplierName": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "invoiceNumber": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "invoiceDate": {
+            "type": [
+              "null",
+              "string"
+            ],
+            "format": "date"
+          },
+          "total": {
+            "type": [
+              "null",
+              "string"
+            ],
+            "pattern": "^-?(?:0|[1-9]\\d{0,26})\\.\\d{2}$"
+          },
+          "currency": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "draftVersion": {
+            "type": "integer",
+            "format": "int32",
+            "minimum": 1
+          },
+          "warningCount": {
+            "type": "integer",
+            "format": "int32",
+            "minimum": 0
+          },
+          "errorCount": {
+            "type": "integer",
+            "format": "int32",
+            "minimum": 0
+          },
+          "exceptionCount": {
+            "type": "integer",
+            "format": "int32",
+            "minimum": 0
+          },
+          "processingFailure": {
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "$ref": "#/components/schemas/ProcessingFailureDto"
+              }
+            ]
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time",
+            "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}\\.\\d{3}Z$"
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time",
+            "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}\\.\\d{3}Z$"
+          }
+        },
+        "additionalProperties": false
+      },
+      "InvoiceQueuePageDto": {
+        "required": [
+          "items",
+          "summary",
+          "page",
+          "pageSize",
+          "totalItems",
+          "totalPages",
+          "hasPreviousPage",
+          "hasNextPage"
+        ],
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/InvoiceQueueItemDto"
+            }
+          },
+          "summary": {
+            "$ref": "#/components/schemas/InvoiceQueueSummaryDto"
+          },
+          "page": {
+            "type": "integer",
+            "format": "int32",
+            "minimum": 1
+          },
+          "pageSize": {
+            "type": "integer",
+            "format": "int32",
+            "minimum": 1
+          },
+          "totalItems": {
+            "type": "integer",
+            "format": "int32",
+            "minimum": 0
+          },
+          "totalPages": {
+            "type": "integer",
+            "format": "int32",
+            "minimum": 0
+          },
+          "hasPreviousPage": {
+            "type": "boolean"
+          },
+          "hasNextPage": {
+            "type": "boolean"
+          }
+        },
+        "additionalProperties": false
+      },
+      "InvoiceQueueSummaryDto": {
+        "required": [
+          "totalInvoiceCount",
+          "processingCount",
+          "reviewRequiredCount",
+          "readyForApprovalCount",
+          "approvedCount",
+          "rejectedCount",
+          "processingFailedCount",
+          "pendingReviewCount",
+          "warningInvoiceCount",
+          "errorInvoiceCount"
+        ],
+        "type": "object",
+        "properties": {
+          "totalInvoiceCount": {
+            "type": "integer",
+            "format": "int32",
+            "minimum": 0
+          },
+          "processingCount": {
+            "type": "integer",
+            "format": "int32",
+            "minimum": 0
+          },
+          "reviewRequiredCount": {
+            "type": "integer",
+            "format": "int32",
+            "minimum": 0
+          },
+          "readyForApprovalCount": {
+            "type": "integer",
+            "format": "int32",
+            "minimum": 0
+          },
+          "approvedCount": {
+            "type": "integer",
+            "format": "int32",
+            "minimum": 0
+          },
+          "rejectedCount": {
+            "type": "integer",
+            "format": "int32",
+            "minimum": 0
+          },
+          "processingFailedCount": {
+            "type": "integer",
+            "format": "int32",
+            "minimum": 0
+          },
+          "pendingReviewCount": {
+            "type": "integer",
+            "format": "int32",
+            "minimum": 0
+          },
+          "warningInvoiceCount": {
+            "type": "integer",
+            "format": "int32",
+            "minimum": 0
+          },
+          "errorInvoiceCount": {
+            "type": "integer",
+            "format": "int32",
+            "minimum": 0
+          }
+        },
+        "additionalProperties": false
+      },
+      "InvoiceSort": {
+        "type": "string",
+        "enum": [
+          "updatedAtDesc",
+          "updatedAtAsc",
+          "createdAtDesc",
+          "createdAtAsc"
+        ]
+      },
+      "InvoiceStatus": {
+        "type": "string",
+        "enum": [
+          "processing",
+          "reviewRequired",
+          "readyForApproval",
+          "approved",
+          "rejected",
+          "processingFailed"
+        ]
+      },
+      "InvoiceSummaryDto": {
+        "required": [
+          "extractedFieldCount",
+          "warningCount",
+          "errorCount",
+          "manualCorrectionCount"
+        ],
+        "type": "object",
+        "properties": {
+          "extractedFieldCount": {
+            "type": "integer",
+            "format": "int32",
+            "minimum": 0
+          },
+          "warningCount": {
+            "type": "integer",
+            "format": "int32",
+            "minimum": 0
+          },
+          "errorCount": {
+            "type": "integer",
+            "format": "int32",
+            "minimum": 0
+          },
+          "manualCorrectionCount": {
+            "type": "integer",
+            "format": "int32",
+            "minimum": 0
+          }
+        },
+        "additionalProperties": false
+      },
+      "MoneyFieldDto": {
+        "required": [
+          "value",
+          "originalValue",
+          "originalSource",
+          "currentSource",
+          "confidence",
+          "confidenceBand",
+          "differsFromOriginal",
+          "lastCorrectedAt"
+        ],
+        "type": "object",
+        "properties": {
+          "value": {
+            "type": [
+              "null",
+              "string"
+            ],
+            "pattern": "^-?(?:0|[1-9]\\d{0,26})\\.\\d{2}$"
+          },
+          "originalValue": {
+            "type": [
+              "null",
+              "string"
+            ],
+            "pattern": "^-?(?:0|[1-9]\\d{0,26})\\.\\d{2}$"
+          },
+          "originalSource": {
+            "$ref": "#/components/schemas/FieldSource"
+          },
+          "currentSource": {
+            "$ref": "#/components/schemas/FieldSource"
+          },
+          "confidence": {
+            "type": [
+              "null",
+              "number"
+            ],
+            "format": "double",
+            "minimum": 0,
+            "maximum": 1
+          },
+          "confidenceBand": {
+            "$ref": "#/components/schemas/ConfidenceBand"
+          },
+          "differsFromOriginal": {
+            "type": "boolean"
+          },
+          "lastCorrectedAt": {
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "type": "string",
+                "format": "date-time",
+                "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}\\.\\d{3}Z$"
+              }
+            ]
+          }
+        },
+        "additionalProperties": false
+      },
+      "ProcessingFailureCode": {
+        "type": "string",
+        "enum": [
+          "PDF_EXTRACTION_FAILED",
+          "PDF_RENDER_FAILED",
+          "OCR_UNAVAILABLE",
+          "OCR_PAGE_TIMEOUT",
+          "OCR_DOCUMENT_TIMEOUT",
+          "OCR_FAILED",
+          "AI_TIMEOUT",
+          "AI_UNAVAILABLE",
+          "AI_REFUSED",
+          "AI_RESPONSE_INCOMPLETE",
+          "AI_RESPONSE_INVALID",
+          "PROCESS_INTERRUPTED",
+          "PROCESSING_FAILED"
+        ]
+      },
+      "ProcessingFailureDto": {
+        "required": [
+          "stage",
+          "code",
+          "message",
+          "failedAt"
+        ],
+        "type": "object",
+        "properties": {
+          "stage": {
+            "$ref": "#/components/schemas/ProcessingStage"
+          },
+          "code": {
+            "$ref": "#/components/schemas/ProcessingFailureCode"
+          },
+          "message": {
+            "type": "string"
+          },
+          "failedAt": {
+            "type": "string",
+            "format": "date-time",
+            "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}\\.\\d{3}Z$"
+          }
+        },
+        "additionalProperties": false
+      },
+      "ProcessingStage": {
+        "type": "string",
+        "enum": [
+          "upload",
+          "pdfExtraction",
+          "ocr",
+          "aiExtraction",
+          "parsing",
+          "persistence",
+          "startupRecovery"
+        ]
+      },
+      "ReferenceDraftDto": {
+        "required": [
+          "invoiceNumber",
+          "purchaseOrderNumber"
+        ],
+        "type": "object",
+        "properties": {
+          "invoiceNumber": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "purchaseOrderNumber": {
+            "type": [
+              "null",
+              "string"
+            ]
+          }
+        },
+        "additionalProperties": false
+      },
+      "ReferenceFieldsDto": {
+        "required": [
+          "invoiceNumber",
+          "purchaseOrderNumber"
+        ],
+        "type": "object",
+        "properties": {
+          "invoiceNumber": {
+            "$ref": "#/components/schemas/TextFieldDto"
+          },
+          "purchaseOrderNumber": {
+            "$ref": "#/components/schemas/TextFieldDto"
+          }
+        },
+        "additionalProperties": false
+      },
+      "RejectInvoiceRequest": {
+        "required": [
+          "expectedVersion",
+          "reason"
+        ],
+        "type": "object",
+        "properties": {
+          "expectedVersion": {
+            "maximum": 2147483647,
+            "minimum": 1,
+            "type": "integer",
+            "format": "int32"
+          },
+          "reason": {
+            "type": [
+              "null",
+              "string"
+            ]
+          }
+        },
+        "additionalProperties": false
+      },
+      "SaveInvoiceDraftRequest": {
+        "required": [
+          "expectedVersion",
+          "draft"
+        ],
+        "type": "object",
+        "properties": {
+          "expectedVersion": {
+            "maximum": 2147483647,
+            "minimum": 1,
+            "type": "integer",
+            "format": "int32"
+          },
+          "draft": {
+            "$ref": "#/components/schemas/InvoiceDraftInputDto"
+          }
+        },
+        "additionalProperties": false
+      },
+      "SupplierDraftDto": {
+        "required": [
+          "name",
+          "registrationId"
+        ],
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "registrationId": {
+            "type": [
+              "null",
+              "string"
+            ]
+          }
+        },
+        "additionalProperties": false
+      },
+      "SupplierFieldsDto": {
+        "required": [
+          "name",
+          "registrationId"
+        ],
+        "type": "object",
+        "properties": {
+          "name": {
+            "$ref": "#/components/schemas/TextFieldDto"
+          },
+          "registrationId": {
+            "$ref": "#/components/schemas/TextFieldDto"
+          }
+        },
+        "additionalProperties": false
+      },
+      "TextFieldDto": {
+        "required": [
+          "value",
+          "originalValue",
+          "originalSource",
+          "currentSource",
+          "confidence",
+          "confidenceBand",
+          "differsFromOriginal",
+          "lastCorrectedAt"
+        ],
+        "type": "object",
+        "properties": {
+          "value": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "originalValue": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "originalSource": {
+            "$ref": "#/components/schemas/FieldSource"
+          },
+          "currentSource": {
+            "$ref": "#/components/schemas/FieldSource"
+          },
+          "confidence": {
+            "type": [
+              "null",
+              "number"
+            ],
+            "format": "double",
+            "minimum": 0,
+            "maximum": 1
+          },
+          "confidenceBand": {
+            "$ref": "#/components/schemas/ConfidenceBand"
+          },
+          "differsFromOriginal": {
+            "type": "boolean"
+          },
+          "lastCorrectedAt": {
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "type": "string",
+                "format": "date-time",
+                "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}\\.\\d{3}Z$"
+              }
+            ]
+          }
+        },
+        "additionalProperties": false
+      },
+      "ValidateInvoiceRequest": {
+        "required": [
+          "expectedVersion"
+        ],
+        "type": "object",
+        "properties": {
+          "expectedVersion": {
+            "maximum": 2147483647,
+            "minimum": 1,
+            "type": "integer",
+            "format": "int32"
+          }
+        },
+        "additionalProperties": false
+      },
+      "ValidationCode": {
+        "type": "string",
+        "enum": [
+          "REQUIRED_FIELD_MISSING",
+          "AMOUNT_RECONCILIATION_FAILED",
+          "NEGATIVE_AMOUNT_UNEXPECTED",
+          "DUE_DATE_BEFORE_INVOICE_DATE",
+          "PAYMENT_TERMS_MISMATCH",
+          "POSSIBLE_DUPLICATE_INVOICE",
+          "CURRENCY_INVALID",
+          "LOW_EXTRACTION_CONFIDENCE",
+          "INVOICE_DATE_IN_FUTURE"
+        ]
+      },
+      "ValidationResultDto": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "$ref": "#/components/schemas/ValidationCode"
+          },
+          "severity": {
+            "$ref": "#/components/schemas/ValidationSeverity"
+          },
+          "message": {
+            "type": "string"
+          },
+          "fields": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/InvoiceFieldKey"
+            }
+          },
+          "data": {}
+        },
+        "required": [
+          "code",
+          "severity",
+          "message",
+          "fields",
+          "data"
+        ],
+        "additionalProperties": false,
+        "discriminator": {
+          "propertyName": "code",
+          "mapping": {
+            "REQUIRED_FIELD_MISSING": "#/components/schemas/RequiredFieldMissingValidationResultDto",
+            "AMOUNT_RECONCILIATION_FAILED": "#/components/schemas/AmountReconciliationFailedValidationResultDto",
+            "NEGATIVE_AMOUNT_UNEXPECTED": "#/components/schemas/NegativeAmountUnexpectedValidationResultDto",
+            "DUE_DATE_BEFORE_INVOICE_DATE": "#/components/schemas/DueDateBeforeInvoiceDateValidationResultDto",
+            "PAYMENT_TERMS_MISMATCH": "#/components/schemas/PaymentTermsMismatchValidationResultDto",
+            "POSSIBLE_DUPLICATE_INVOICE": "#/components/schemas/PossibleDuplicateInvoiceValidationResultDto",
+            "CURRENCY_INVALID": "#/components/schemas/CurrencyInvalidValidationResultDto",
+            "LOW_EXTRACTION_CONFIDENCE": "#/components/schemas/LowExtractionConfidenceValidationResultDto",
+            "INVOICE_DATE_IN_FUTURE": "#/components/schemas/InvoiceDateInFutureValidationResultDto"
+          }
+        }
+      },
+      "ValidationRunDto": {
+        "required": [
+          "id",
+          "draftVersion",
+          "validatedAt",
+          "warningCount",
+          "errorCount",
+          "results"
+        ],
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$"
+          },
+          "draftVersion": {
+            "type": "integer",
+            "format": "int32",
+            "minimum": 1
+          },
+          "validatedAt": {
+            "type": "string",
+            "format": "date-time",
+            "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}\\.\\d{3}Z$"
+          },
+          "warningCount": {
+            "type": "integer",
+            "format": "int32",
+            "minimum": 0
+          },
+          "errorCount": {
+            "type": "integer",
+            "format": "int32",
+            "minimum": 0
+          },
+          "results": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ValidationResultDto"
+            }
+          }
+        },
+        "additionalProperties": false
+      },
+      "ValidationSeverity": {
+        "type": "string",
+        "enum": [
+          "warning",
+          "error"
+        ]
+      },
+      "ValidationTrigger": {
+        "type": "string",
+        "enum": [
+          "initial",
+          "explicit",
+          "approval"
+        ]
+      },
+      "AuditActor": {
+        "type": "string",
+        "enum": [
+          "system",
+          "reviewer"
+        ]
+      },
+      "AuditEventType": {
+        "type": "string",
+        "enum": [
+          "invoiceUploaded",
+          "extractionCompleted",
+          "extractionFailed",
+          "draftSaved",
+          "validationCompleted",
+          "invoiceApproved",
+          "invoiceRejected",
+          "documentIntegrityChanged"
+        ]
+      },
+      "DuplicateInvoiceMatchDto": {
+        "type": "object",
+        "properties": {
+          "invoiceId": {
+            "type": "string",
+            "format": "uuid",
+            "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$"
+          },
+          "status": {
+            "$ref": "#/components/schemas/InvoiceStatus"
+          }
+        },
+        "required": [
+          "invoiceId",
+          "status"
+        ],
+        "additionalProperties": false
+      },
+      "RequiredFieldMissingValidationDataDto": {
+        "type": "object",
+        "properties": {
+          "missingField": {
+            "$ref": "#/components/schemas/InvoiceFieldKey"
+          }
+        },
+        "required": [
+          "missingField"
+        ],
+        "additionalProperties": false
+      },
+      "AmountReconciliationFailedValidationDataDto": {
+        "type": "object",
+        "properties": {
+          "currency": {
+            "type": "string"
+          },
+          "subtotal": {
+            "type": "string",
+            "pattern": "^-?(?:0|[1-9]\\d{0,26})\\.\\d{2}$"
+          },
+          "taxAmount": {
+            "type": "string",
+            "pattern": "^-?(?:0|[1-9]\\d{0,26})\\.\\d{2}$"
+          },
+          "expectedTotal": {
+            "type": "string",
+            "pattern": "^-?(?:0|[1-9]\\d{0,26})\\.\\d{2}$"
+          },
+          "actualTotal": {
+            "type": "string",
+            "pattern": "^-?(?:0|[1-9]\\d{0,26})\\.\\d{2}$"
+          },
+          "difference": {
+            "type": "string",
+            "pattern": "^-?(?:0|[1-9]\\d{0,26})\\.\\d{2}$"
+          },
+          "tolerance": {
+            "type": "string",
+            "pattern": "^-?(?:0|[1-9]\\d{0,26})\\.\\d{2}$"
+          }
+        },
+        "required": [
+          "currency",
+          "subtotal",
+          "taxAmount",
+          "expectedTotal",
+          "actualTotal",
+          "difference",
+          "tolerance"
+        ],
+        "additionalProperties": false
+      },
+      "NegativeAmountUnexpectedValidationDataDto": {
+        "type": "object",
+        "properties": {
+          "field": {
+            "$ref": "#/components/schemas/InvoiceFieldKey"
+          },
+          "amount": {
+            "type": "string",
+            "pattern": "^-?(?:0|[1-9]\\d{0,26})\\.\\d{2}$"
+          }
+        },
+        "required": [
+          "field",
+          "amount"
+        ],
+        "additionalProperties": false
+      },
+      "DueDateBeforeInvoiceDateValidationDataDto": {
+        "type": "object",
+        "properties": {
+          "invoiceDate": {
+            "type": "string",
+            "format": "date",
+            "pattern": "^\\d{4}-\\d{2}-\\d{2}$"
+          },
+          "dueDate": {
+            "type": "string",
+            "format": "date",
+            "pattern": "^\\d{4}-\\d{2}-\\d{2}$"
+          }
+        },
+        "required": [
+          "invoiceDate",
+          "dueDate"
+        ],
+        "additionalProperties": false
+      },
+      "PaymentTermsMismatchValidationDataDto": {
+        "type": "object",
+        "properties": {
+          "invoiceDate": {
+            "type": "string",
+            "format": "date",
+            "pattern": "^\\d{4}-\\d{2}-\\d{2}$"
+          },
+          "dueDate": {
+            "type": "string",
+            "format": "date",
+            "pattern": "^\\d{4}-\\d{2}-\\d{2}$"
+          },
+          "normalizedPaymentTermsDays": {
+            "type": "integer",
+            "format": "int32",
+            "minimum": 0
+          },
+          "calculatedDueDate": {
+            "type": "string",
+            "format": "date",
+            "pattern": "^\\d{4}-\\d{2}-\\d{2}$"
+          }
+        },
+        "required": [
+          "invoiceDate",
+          "dueDate",
+          "normalizedPaymentTermsDays",
+          "calculatedDueDate"
+        ],
+        "additionalProperties": false
+      },
+      "PossibleDuplicateInvoiceValidationDataDto": {
+        "type": "object",
+        "properties": {
+          "matches": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/DuplicateInvoiceMatchDto"
+            }
+          }
+        },
+        "required": [
+          "matches"
+        ],
+        "additionalProperties": false
+      },
+      "CurrencyInvalidValidationDataDto": {
+        "type": "object",
+        "properties": {
+          "value": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "allowedCurrencies": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        },
+        "required": [
+          "value",
+          "allowedCurrencies"
+        ],
+        "additionalProperties": false
+      },
+      "LowExtractionConfidenceValidationDataDto": {
+        "type": "object",
+        "properties": {
+          "field": {
+            "$ref": "#/components/schemas/InvoiceFieldKey"
+          },
+          "confidence": {
+            "type": [
+              "null",
+              "number"
+            ],
+            "format": "double",
+            "minimum": 0,
+            "maximum": 1
+          },
+          "confidenceBand": {
+            "type": "string",
+            "enum": [
+              "low",
+              "unknown"
+            ]
+          }
+        },
+        "required": [
+          "field",
+          "confidence",
+          "confidenceBand"
+        ],
+        "additionalProperties": false
+      },
+      "InvoiceDateInFutureValidationDataDto": {
+        "type": "object",
+        "properties": {
+          "invoiceDate": {
+            "type": "string",
+            "format": "date",
+            "pattern": "^\\d{4}-\\d{2}-\\d{2}$"
+          },
+          "currentLocalDate": {
+            "type": "string",
+            "format": "date",
+            "pattern": "^\\d{4}-\\d{2}-\\d{2}$"
+          }
+        },
+        "required": [
+          "invoiceDate",
+          "currentLocalDate"
+        ],
+        "additionalProperties": false
+      },
+      "RequiredFieldMissingValidationResultDto": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/ValidationResultDto"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "data": {
+                "$ref": "#/components/schemas/RequiredFieldMissingValidationDataDto"
+              }
+            },
+            "required": [
+              "data"
+            ]
+          }
+        ]
+      },
+      "AmountReconciliationFailedValidationResultDto": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/ValidationResultDto"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "data": {
+                "$ref": "#/components/schemas/AmountReconciliationFailedValidationDataDto"
+              }
+            },
+            "required": [
+              "data"
+            ]
+          }
+        ]
+      },
+      "NegativeAmountUnexpectedValidationResultDto": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/ValidationResultDto"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "data": {
+                "$ref": "#/components/schemas/NegativeAmountUnexpectedValidationDataDto"
+              }
+            },
+            "required": [
+              "data"
+            ]
+          }
+        ]
+      },
+      "DueDateBeforeInvoiceDateValidationResultDto": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/ValidationResultDto"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "data": {
+                "$ref": "#/components/schemas/DueDateBeforeInvoiceDateValidationDataDto"
+              }
+            },
+            "required": [
+              "data"
+            ]
+          }
+        ]
+      },
+      "PaymentTermsMismatchValidationResultDto": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/ValidationResultDto"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "data": {
+                "$ref": "#/components/schemas/PaymentTermsMismatchValidationDataDto"
+              }
+            },
+            "required": [
+              "data"
+            ]
+          }
+        ]
+      },
+      "PossibleDuplicateInvoiceValidationResultDto": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/ValidationResultDto"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "data": {
+                "$ref": "#/components/schemas/PossibleDuplicateInvoiceValidationDataDto"
+              }
+            },
+            "required": [
+              "data"
+            ]
+          }
+        ]
+      },
+      "CurrencyInvalidValidationResultDto": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/ValidationResultDto"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "data": {
+                "$ref": "#/components/schemas/CurrencyInvalidValidationDataDto"
+              }
+            },
+            "required": [
+              "data"
+            ]
+          }
+        ]
+      },
+      "LowExtractionConfidenceValidationResultDto": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/ValidationResultDto"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "data": {
+                "$ref": "#/components/schemas/LowExtractionConfidenceValidationDataDto"
+              }
+            },
+            "required": [
+              "data"
+            ]
+          }
+        ]
+      },
+      "InvoiceDateInFutureValidationResultDto": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/ValidationResultDto"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "data": {
+                "$ref": "#/components/schemas/InvoiceDateInFutureValidationDataDto"
+              }
+            },
+            "required": [
+              "data"
+            ]
+          }
+        ]
+      },
+      "InvoiceUploadedAuditDetailsDto": {
+        "type": "object",
+        "properties": {
+          "document": {
+            "$ref": "#/components/schemas/InvoiceDocumentDto"
+          }
+        },
+        "required": [
+          "document"
+        ],
+        "additionalProperties": false
+      },
+      "ExtractionCompletedAuditDetailsDto": {
+        "type": "object",
+        "properties": {
+          "documentTextSource": {
+            "$ref": "#/components/schemas/DocumentTextSource"
+          },
+          "extractedFieldCount": {
+            "type": "integer",
+            "format": "int32",
+            "minimum": 0
+          }
+        },
+        "required": [
+          "documentTextSource",
+          "extractedFieldCount"
+        ],
+        "additionalProperties": false
+      },
+      "ExtractionFailedAuditDetailsDto": {
+        "type": "object",
+        "properties": {
+          "failure": {
+            "$ref": "#/components/schemas/ProcessingFailureDto"
+          }
+        },
+        "required": [
+          "failure"
+        ],
+        "additionalProperties": false
+      },
+      "DraftSavedAuditDetailsDto": {
+        "type": "object",
+        "properties": {
+          "isNoOp": {
+            "type": "boolean"
+          },
+          "changes": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/FieldCorrectionDto"
+            }
+          }
+        },
+        "required": [
+          "isNoOp",
+          "changes"
+        ],
+        "additionalProperties": false
+      },
+      "ValidationCompletedAuditDetailsDto": {
+        "type": "object",
+        "properties": {
+          "trigger": {
+            "$ref": "#/components/schemas/ValidationTrigger"
+          },
+          "validationRunId": {
+            "type": "string",
+            "format": "uuid",
+            "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$"
+          },
+          "warningCount": {
+            "type": "integer",
+            "format": "int32",
+            "minimum": 0
+          },
+          "errorCount": {
+            "type": "integer",
+            "format": "int32",
+            "minimum": 0
+          },
+          "resultingStatus": {
+            "$ref": "#/components/schemas/InvoiceStatus"
+          }
+        },
+        "required": [
+          "trigger",
+          "validationRunId",
+          "warningCount",
+          "errorCount",
+          "resultingStatus"
+        ],
+        "additionalProperties": false
+      },
+      "InvoiceApprovedAuditDetailsDto": {
+        "type": "object",
+        "properties": {
+          "decidedAt": {
+            "type": "string",
+            "format": "date-time",
+            "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}\\.\\d{3}Z$"
+          }
+        },
+        "required": [
+          "decidedAt"
+        ],
+        "additionalProperties": false
+      },
+      "InvoiceRejectedAuditDetailsDto": {
+        "type": "object",
+        "properties": {
+          "decidedAt": {
+            "type": "string",
+            "format": "date-time",
+            "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}\\.\\d{3}Z$"
+          },
+          "rejectionReason": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "decidedAt",
+          "rejectionReason"
+        ],
+        "additionalProperties": false
+      },
+      "DocumentIntegrityChangedAuditDetailsDto": {
+        "type": "object",
+        "properties": {
+          "previousStatus": {
+            "$ref": "#/components/schemas/DocumentIntegrityStatus"
+          },
+          "currentStatus": {
+            "$ref": "#/components/schemas/DocumentIntegrityStatus"
+          }
+        },
+        "required": [
+          "previousStatus",
+          "currentStatus"
+        ],
+        "additionalProperties": false
+      },
+      "InvoiceUploadedAuditEventDto": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/AuditEventDto"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "details": {
+                "$ref": "#/components/schemas/InvoiceUploadedAuditDetailsDto"
+              }
+            },
+            "required": [
+              "details"
+            ]
+          }
+        ]
+      },
+      "ExtractionCompletedAuditEventDto": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/AuditEventDto"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "details": {
+                "$ref": "#/components/schemas/ExtractionCompletedAuditDetailsDto"
+              }
+            },
+            "required": [
+              "details"
+            ]
+          }
+        ]
+      },
+      "ExtractionFailedAuditEventDto": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/AuditEventDto"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "details": {
+                "$ref": "#/components/schemas/ExtractionFailedAuditDetailsDto"
+              }
+            },
+            "required": [
+              "details"
+            ]
+          }
+        ]
+      },
+      "DraftSavedAuditEventDto": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/AuditEventDto"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "details": {
+                "$ref": "#/components/schemas/DraftSavedAuditDetailsDto"
+              }
+            },
+            "required": [
+              "details"
+            ]
+          }
+        ]
+      },
+      "ValidationCompletedAuditEventDto": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/AuditEventDto"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "details": {
+                "$ref": "#/components/schemas/ValidationCompletedAuditDetailsDto"
+              }
+            },
+            "required": [
+              "details"
+            ]
+          }
+        ]
+      },
+      "InvoiceApprovedAuditEventDto": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/AuditEventDto"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "details": {
+                "$ref": "#/components/schemas/InvoiceApprovedAuditDetailsDto"
+              }
+            },
+            "required": [
+              "details"
+            ]
+          }
+        ]
+      },
+      "InvoiceRejectedAuditEventDto": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/AuditEventDto"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "details": {
+                "$ref": "#/components/schemas/InvoiceRejectedAuditDetailsDto"
+              }
+            },
+            "required": [
+              "details"
+            ]
+          }
+        ]
+      },
+      "DocumentIntegrityChangedAuditEventDto": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/AuditEventDto"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "details": {
+                "$ref": "#/components/schemas/DocumentIntegrityChangedAuditDetailsDto"
+              }
+            },
+            "required": [
+              "details"
+            ]
+          }
+        ]
+      },
+      "AuditEventDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^(?:0|[1-9]\\d*)$"
+          },
+          "invoiceId": {
+            "type": "string",
+            "format": "uuid",
+            "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$"
+          },
+          "type": {
+            "$ref": "#/components/schemas/AuditEventType"
+          },
+          "actor": {
+            "$ref": "#/components/schemas/AuditActor"
+          },
+          "occurredAt": {
+            "type": "string",
+            "format": "date-time",
+            "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}\\.\\d{3}Z$"
+          },
+          "draftVersion": {
+            "type": "integer",
+            "format": "int32",
+            "minimum": 1
+          },
+          "details": {}
+        },
+        "required": [
+          "id",
+          "invoiceId",
+          "type",
+          "actor",
+          "occurredAt",
+          "draftVersion",
+          "details"
+        ],
+        "additionalProperties": false,
+        "discriminator": {
+          "propertyName": "type",
+          "mapping": {
+            "invoiceUploaded": "#/components/schemas/InvoiceUploadedAuditEventDto",
+            "extractionCompleted": "#/components/schemas/ExtractionCompletedAuditEventDto",
+            "extractionFailed": "#/components/schemas/ExtractionFailedAuditEventDto",
+            "draftSaved": "#/components/schemas/DraftSavedAuditEventDto",
+            "validationCompleted": "#/components/schemas/ValidationCompletedAuditEventDto",
+            "invoiceApproved": "#/components/schemas/InvoiceApprovedAuditEventDto",
+            "invoiceRejected": "#/components/schemas/InvoiceRejectedAuditEventDto",
+            "documentIntegrityChanged": "#/components/schemas/DocumentIntegrityChangedAuditEventDto"
           }
         }
       }
@@ -25,7 +3191,34 @@
   },
   "tags": [
     {
-      "name": "InvoiceReviewAssistant.Api"
+      "name": "InvoiceApproval"
+    },
+    {
+      "name": "InvoiceDetails"
+    },
+    {
+      "name": "InvoiceDocuments"
+    },
+    {
+      "name": "InvoiceDrafts"
+    },
+    {
+      "name": "InvoiceExports"
+    },
+    {
+      "name": "InvoiceHistory"
+    },
+    {
+      "name": "InvoiceQueue"
+    },
+    {
+      "name": "InvoiceUploads"
+    },
+    {
+      "name": "InvoiceRejections"
+    },
+    {
+      "name": "InvoiceValidation"
     }
   ]
 }

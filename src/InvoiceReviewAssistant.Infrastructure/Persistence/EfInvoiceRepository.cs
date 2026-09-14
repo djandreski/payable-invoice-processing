@@ -200,21 +200,27 @@ public sealed class EfInvoiceRepository(InvoiceDbContext context) : IInvoiceRepo
             row.LastCorrectedAtUtc is { } corrected ? AsDateTimeOffset(corrected) : null)).ToArray();
         var initialRun = entity.ValidationRuns.OrderBy(run => run.ValidatedAtUtc).ThenBy(run => run.Id).FirstOrDefault()
             ?? throw new InvalidOperationException("An extracted invoice must have an initial validation run.");
-        invoice.CompleteExtraction(ToDraft(entity), metadata, Enum.Parse<DocumentTextSource>(entity.DocumentTextSource!, false), ToValidationRun(initialRun), AsDateTimeOffset(entity.UpdatedAtUtc));
+        var persistedDraft = ToDraft(entity);
+        var initialDraft = entity.DraftVersion > 1
+            ? RehydrationDraft(persistedDraft, persistedDraft, 1)
+            : persistedDraft;
+        invoice.CompleteExtraction(initialDraft, metadata, Enum.Parse<DocumentTextSource>(entity.DocumentTextSource!, false), ToValidationRun(initialRun), AsDateTimeOffset(entity.UpdatedAtUtc));
 
         // The aggregate deliberately has no persistence-specific setter. Replaying inert draft saves brings its
         // application-managed concurrency version back to the persisted version without bypassing invariants.
         while (invoice.DraftVersion.Value < entity.DraftVersion)
         {
-            var next = invoice.DraftVersion.Value + 1 == entity.DraftVersion ? ToDraft(entity) : RehydrationDraft(invoice.Draft!);
+            var next = invoice.DraftVersion.Value + 1 == entity.DraftVersion
+                ? persistedDraft
+                : RehydrationDraft(invoice.Draft!, persistedDraft, invoice.DraftVersion.Value + 1);
             invoice.SaveDraft(next, invoice.DraftVersion, AsDateTimeOffset(entity.UpdatedAtUtc));
         }
 
         var status = Enum.Parse<InvoiceStatus>(entity.Status, false);
-        if (status is InvoiceStatus.ReadyForApproval or InvoiceStatus.Approved)
+        if (entity.CurrentValidationRunId is { } currentValidationRunId &&
+            (currentValidationRunId != initialRun.Id || status != InvoiceStatus.ReviewRequired))
         {
-            var current = entity.ValidationRuns.Single(run => run.Id == entity.CurrentValidationRunId)
-                ?? throw new InvalidOperationException("An approval-ready invoice must reference its current validation run.");
+            var current = entity.ValidationRuns.Single(run => run.Id == currentValidationRunId);
             invoice.ApplyValidation(ToValidationRun(current), ValidationTrigger.Explicit, invoice.DraftVersion, AsDateTimeOffset(entity.UpdatedAtUtc));
         }
 
@@ -230,10 +236,17 @@ public sealed class EfInvoiceRepository(InvoiceDbContext context) : IInvoiceRepo
         return invoice;
     }
 
-    private static InvoiceDraft RehydrationDraft(InvoiceDraft current) => current with
+    private static InvoiceDraft RehydrationDraft(InvoiceDraft current, InvoiceDraft persisted, int targetVersion)
     {
-        ReviewNotes = current.ReviewNotes == "__persistence_rehydration__" ? null : "__persistence_rehydration__"
-    };
+        var marker = $"__persistence_rehydration_{targetVersion}__";
+        while (string.Equals(marker, current.ReviewNotes, StringComparison.Ordinal) ||
+               string.Equals(marker, persisted.ReviewNotes, StringComparison.Ordinal))
+        {
+            marker += "_";
+        }
+
+        return current with { ReviewNotes = marker };
+    }
 
     private static ValidationRun ToValidationRun(ValidationRunEntity entity) => new(
         new ValidationRunId(entity.Id), new DraftVersion(entity.DraftVersion), AsDateTimeOffset(entity.ValidatedAtUtc),

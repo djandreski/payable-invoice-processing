@@ -20,35 +20,1284 @@ export class Client {
     /**
      * @return OK
      */
-    health(): Promise<void> {
-        let url_ = this.baseUrl + "/health";
+    approveInvoice(id: string, body: ApproveInvoiceRequest): Promise<InvoiceDetailDto> {
+        let url_ = this.baseUrl + "/api/invoices/{id}/approve";
+        if (id === undefined || id === null)
+            throw new globalThis.Error("The parameter 'id' must be defined.");
+        url_ = url_.replace("{id}", encodeURIComponent("" + id));
         url_ = url_.replace(/[?&]$/, "");
 
+        const content_ = JSON.stringify(body);
+
         let options_: RequestInit = {
-            method: "GET",
+            body: content_,
+            method: "POST",
             headers: {
+                "Content-Type": "application/json",
+                "Accept": "application/json"
             }
         };
 
         return this.http.fetch(url_, options_).then((_response: Response) => {
-            return this.processHealth(_response);
+            return this.processApproveInvoice(_response);
         });
     }
 
-    protected processHealth(response: Response): Promise<void> {
+    protected processApproveInvoice(response: Response): Promise<InvoiceDetailDto> {
         const status = response.status;
         let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
         if (status === 200) {
             return response.text().then((_responseText) => {
-            return;
+            let result200: any = null;
+            result200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver) as InvoiceDetailDto;
+            return result200;
+            });
+        } else if (status === 400) {
+            return response.text().then((_responseText) => {
+            let result400: any = null;
+            result400 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver) as InvoiceProblemDetails;
+            return throwException("Bad Request", status, _responseText, _headers, result400);
+            });
+        } else if (status === 404) {
+            return response.text().then((_responseText) => {
+            let result404: any = null;
+            result404 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver) as InvoiceProblemDetails;
+            return throwException("Not Found", status, _responseText, _headers, result404);
+            });
+        } else if (status === 409) {
+            return response.text().then((_responseText) => {
+            let result409: any = null;
+            result409 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver) as InvoiceProblemDetails;
+            return throwException("Conflict", status, _responseText, _headers, result409);
+            });
+        } else if (status === 500) {
+            return response.text().then((_responseText) => {
+            let result500: any = null;
+            result500 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver) as InvoiceProblemDetails;
+            return throwException("Internal Server Error", status, _responseText, _headers, result500);
             });
         } else if (status !== 200 && status !== 204) {
             return response.text().then((_responseText) => {
             return throwException("An unexpected server error occurred.", status, _responseText, _headers);
             });
         }
-        return Promise.resolve<void>(null as any);
+        return Promise.resolve<InvoiceDetailDto>(null as any);
     }
+
+    /**
+     * @return OK
+     */
+    getInvoice(id: string): Promise<InvoiceDetailDto> {
+        let url_ = this.baseUrl + "/api/invoices/{id}";
+        if (id === undefined || id === null)
+            throw new globalThis.Error("The parameter 'id' must be defined.");
+        url_ = url_.replace("{id}", encodeURIComponent("" + id));
+        url_ = url_.replace(/[?&]$/, "");
+
+        let options_: RequestInit = {
+            method: "GET",
+            headers: {
+                "Accept": "application/json"
+            }
+        };
+
+        return this.http.fetch(url_, options_).then((_response: Response) => {
+            return this.processGetInvoice(_response);
+        });
+    }
+
+    protected processGetInvoice(response: Response): Promise<InvoiceDetailDto> {
+        const status = response.status;
+        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
+        if (status === 200) {
+            return response.text().then((_responseText) => {
+            let result200: any = null;
+            result200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver) as InvoiceDetailDto;
+            return result200;
+            });
+        } else if (status === 400) {
+            return response.text().then((_responseText) => {
+            let result400: any = null;
+            result400 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver) as InvoiceProblemDetails;
+            return throwException("Bad Request", status, _responseText, _headers, result400);
+            });
+        } else if (status === 404) {
+            return response.text().then((_responseText) => {
+            let result404: any = null;
+            result404 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver) as InvoiceProblemDetails;
+            return throwException("Not Found", status, _responseText, _headers, result404);
+            });
+        } else if (status === 500) {
+            return response.text().then((_responseText) => {
+            let result500: any = null;
+            result500 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver) as InvoiceProblemDetails;
+            return throwException("Internal Server Error", status, _responseText, _headers, result500);
+            });
+        } else if (status !== 200 && status !== 204) {
+            return response.text().then((_responseText) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            });
+        }
+        return Promise.resolve<InvoiceDetailDto>(null as any);
+    }
+
+    /**
+     * @return OK
+     */
+    getInvoiceDocument(id: string): Promise<FileResponse> {
+        let url_ = this.baseUrl + "/api/invoices/{id}/document";
+        if (id === undefined || id === null)
+            throw new globalThis.Error("The parameter 'id' must be defined.");
+        url_ = url_.replace("{id}", encodeURIComponent("" + id));
+        url_ = url_.replace(/[?&]$/, "");
+
+        let options_: RequestInit = {
+            method: "GET",
+            headers: {
+                "Accept": "application/pdf"
+            }
+        };
+
+        return this.http.fetch(url_, options_).then((_response: Response) => {
+            return this.processGetInvoiceDocument(_response);
+        });
+    }
+
+    protected processGetInvoiceDocument(response: Response): Promise<FileResponse> {
+        const status = response.status;
+        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
+        if (status === 200 || status === 206) {
+            const contentDisposition = response.headers ? response.headers.get("content-disposition") : undefined;
+            let fileNameMatch = contentDisposition ? /filename\*=(?:(\\?['"])(.*?)\1|(?:[^\s]+'.*?')?([^;\n]*))/g.exec(contentDisposition) : undefined;
+            let fileName = fileNameMatch && fileNameMatch.length > 1 ? fileNameMatch[3] || fileNameMatch[2] : undefined;
+            if (fileName) {
+                fileName = decodeURIComponent(fileName);
+            } else {
+                fileNameMatch = contentDisposition ? /filename="?([^"]*?)"?(;|$)/g.exec(contentDisposition) : undefined;
+                fileName = fileNameMatch && fileNameMatch.length > 1 ? fileNameMatch[1] : undefined;
+            }
+            return response.blob().then(blob => { return { fileName: fileName, data: blob, status: status, headers: _headers }; });
+        } else if (status === 206) {
+            const contentDisposition = response.headers ? response.headers.get("content-disposition") : undefined;
+            let fileNameMatch = contentDisposition ? /filename\*=(?:(\\?['"])(.*?)\1|(?:[^\s]+'.*?')?([^;\n]*))/g.exec(contentDisposition) : undefined;
+            let fileName = fileNameMatch && fileNameMatch.length > 1 ? fileNameMatch[3] || fileNameMatch[2] : undefined;
+            if (fileName) {
+                fileName = decodeURIComponent(fileName);
+            } else {
+                fileNameMatch = contentDisposition ? /filename="?([^"]*?)"?(;|$)/g.exec(contentDisposition) : undefined;
+                fileName = fileNameMatch && fileNameMatch.length > 1 ? fileNameMatch[1] : undefined;
+            }
+            return response.blob().then(blob => { return { fileName: fileName, data: blob, status: status, headers: _headers }; });
+        } else if (status === 400) {
+            return response.text().then((_responseText) => {
+            let result400: any = null;
+            result400 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver) as InvoiceProblemDetails;
+            return throwException("Bad Request", status, _responseText, _headers, result400);
+            });
+        } else if (status === 404) {
+            return response.text().then((_responseText) => {
+            let result404: any = null;
+            result404 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver) as InvoiceProblemDetails;
+            return throwException("Not Found", status, _responseText, _headers, result404);
+            });
+        } else if (status === 416) {
+            return response.text().then((_responseText) => {
+            return throwException("Range Not Satisfiable", status, _responseText, _headers);
+            });
+        } else if (status === 500) {
+            return response.text().then((_responseText) => {
+            let result500: any = null;
+            result500 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver) as InvoiceProblemDetails;
+            return throwException("Internal Server Error", status, _responseText, _headers, result500);
+            });
+        } else if (status !== 200 && status !== 204) {
+            return response.text().then((_responseText) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            });
+        }
+        return Promise.resolve<FileResponse>(null as any);
+    }
+
+    /**
+     * @return OK
+     */
+    saveInvoiceDraft(id: string, body: SaveInvoiceDraftRequest): Promise<InvoiceDetailDto> {
+        let url_ = this.baseUrl + "/api/invoices/{id}/draft";
+        if (id === undefined || id === null)
+            throw new globalThis.Error("The parameter 'id' must be defined.");
+        url_ = url_.replace("{id}", encodeURIComponent("" + id));
+        url_ = url_.replace(/[?&]$/, "");
+
+        const content_ = JSON.stringify(body);
+
+        let options_: RequestInit = {
+            body: content_,
+            method: "PUT",
+            headers: {
+                "Content-Type": "application/json",
+                "Accept": "application/json"
+            }
+        };
+
+        return this.http.fetch(url_, options_).then((_response: Response) => {
+            return this.processSaveInvoiceDraft(_response);
+        });
+    }
+
+    protected processSaveInvoiceDraft(response: Response): Promise<InvoiceDetailDto> {
+        const status = response.status;
+        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
+        if (status === 200) {
+            return response.text().then((_responseText) => {
+            let result200: any = null;
+            result200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver) as InvoiceDetailDto;
+            return result200;
+            });
+        } else if (status === 400) {
+            return response.text().then((_responseText) => {
+            let result400: any = null;
+            result400 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver) as InvoiceProblemDetails;
+            return throwException("Bad Request", status, _responseText, _headers, result400);
+            });
+        } else if (status === 404) {
+            return response.text().then((_responseText) => {
+            let result404: any = null;
+            result404 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver) as InvoiceProblemDetails;
+            return throwException("Not Found", status, _responseText, _headers, result404);
+            });
+        } else if (status === 409) {
+            return response.text().then((_responseText) => {
+            let result409: any = null;
+            result409 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver) as InvoiceProblemDetails;
+            return throwException("Conflict", status, _responseText, _headers, result409);
+            });
+        } else if (status === 500) {
+            return response.text().then((_responseText) => {
+            let result500: any = null;
+            result500 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver) as InvoiceProblemDetails;
+            return throwException("Internal Server Error", status, _responseText, _headers, result500);
+            });
+        } else if (status !== 200 && status !== 204) {
+            return response.text().then((_responseText) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            });
+        }
+        return Promise.resolve<InvoiceDetailDto>(null as any);
+    }
+
+    /**
+     * @return OK
+     */
+    exportInvoice(id: string): Promise<InvoiceExportV1Dto> {
+        let url_ = this.baseUrl + "/api/invoices/{id}/export";
+        if (id === undefined || id === null)
+            throw new globalThis.Error("The parameter 'id' must be defined.");
+        url_ = url_.replace("{id}", encodeURIComponent("" + id));
+        url_ = url_.replace(/[?&]$/, "");
+
+        let options_: RequestInit = {
+            method: "GET",
+            headers: {
+                "Accept": "application/json"
+            }
+        };
+
+        return this.http.fetch(url_, options_).then((_response: Response) => {
+            return this.processExportInvoice(_response);
+        });
+    }
+
+    protected processExportInvoice(response: Response): Promise<InvoiceExportV1Dto> {
+        const status = response.status;
+        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
+        if (status === 200) {
+            return response.text().then((_responseText) => {
+            let result200: any = null;
+            result200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver) as InvoiceExportV1Dto;
+            return result200;
+            });
+        } else if (status === 400) {
+            return response.text().then((_responseText) => {
+            let result400: any = null;
+            result400 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver) as InvoiceProblemDetails;
+            return throwException("Bad Request", status, _responseText, _headers, result400);
+            });
+        } else if (status === 404) {
+            return response.text().then((_responseText) => {
+            let result404: any = null;
+            result404 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver) as InvoiceProblemDetails;
+            return throwException("Not Found", status, _responseText, _headers, result404);
+            });
+        } else if (status === 409) {
+            return response.text().then((_responseText) => {
+            let result409: any = null;
+            result409 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver) as InvoiceProblemDetails;
+            return throwException("Conflict", status, _responseText, _headers, result409);
+            });
+        } else if (status === 500) {
+            return response.text().then((_responseText) => {
+            let result500: any = null;
+            result500 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver) as InvoiceProblemDetails;
+            return throwException("Internal Server Error", status, _responseText, _headers, result500);
+            });
+        } else if (status !== 200 && status !== 204) {
+            return response.text().then((_responseText) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            });
+        }
+        return Promise.resolve<InvoiceExportV1Dto>(null as any);
+    }
+
+    /**
+     * @param page (optional)
+     * @param pageSize (optional)
+     * @return OK
+     */
+    getInvoiceHistory(id: string, page: number | undefined, pageSize: number | undefined): Promise<AuditHistoryPageDto> {
+        let url_ = this.baseUrl + "/api/invoices/{id}/history?";
+        if (id === undefined || id === null)
+            throw new globalThis.Error("The parameter 'id' must be defined.");
+        url_ = url_.replace("{id}", encodeURIComponent("" + id));
+        if (page === null)
+            throw new globalThis.Error("The parameter 'page' cannot be null.");
+        else if (page !== undefined)
+            url_ += "page=" + encodeURIComponent("" + page) + "&";
+        if (pageSize === null)
+            throw new globalThis.Error("The parameter 'pageSize' cannot be null.");
+        else if (pageSize !== undefined)
+            url_ += "pageSize=" + encodeURIComponent("" + pageSize) + "&";
+        url_ = url_.replace(/[?&]$/, "");
+
+        let options_: RequestInit = {
+            method: "GET",
+            headers: {
+                "Accept": "application/json"
+            }
+        };
+
+        return this.http.fetch(url_, options_).then((_response: Response) => {
+            return this.processGetInvoiceHistory(_response);
+        });
+    }
+
+    protected processGetInvoiceHistory(response: Response): Promise<AuditHistoryPageDto> {
+        const status = response.status;
+        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
+        if (status === 200) {
+            return response.text().then((_responseText) => {
+            let result200: any = null;
+            result200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver) as AuditHistoryPageDto;
+            return result200;
+            });
+        } else if (status === 400) {
+            return response.text().then((_responseText) => {
+            let result400: any = null;
+            result400 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver) as InvoiceProblemDetails;
+            return throwException("Bad Request", status, _responseText, _headers, result400);
+            });
+        } else if (status === 404) {
+            return response.text().then((_responseText) => {
+            let result404: any = null;
+            result404 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver) as InvoiceProblemDetails;
+            return throwException("Not Found", status, _responseText, _headers, result404);
+            });
+        } else if (status === 500) {
+            return response.text().then((_responseText) => {
+            let result500: any = null;
+            result500 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver) as InvoiceProblemDetails;
+            return throwException("Internal Server Error", status, _responseText, _headers, result500);
+            });
+        } else if (status !== 200 && status !== 204) {
+            return response.text().then((_responseText) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            });
+        }
+        return Promise.resolve<AuditHistoryPageDto>(null as any);
+    }
+
+    /**
+     * @param search (optional)
+     * @param status (optional)
+     * @param page (optional)
+     * @param pageSize (optional)
+     * @param sort (optional)
+     * @return OK
+     */
+    listInvoices(search: string | undefined, status: InvoiceStatus[] | undefined, page: number | undefined, pageSize: number | undefined, sort: InvoiceSort | undefined): Promise<InvoiceQueuePageDto> {
+        let url_ = this.baseUrl + "/api/invoices?";
+        if (search === null)
+            throw new globalThis.Error("The parameter 'search' cannot be null.");
+        else if (search !== undefined)
+            url_ += "search=" + encodeURIComponent("" + search) + "&";
+        if (status === null)
+            throw new globalThis.Error("The parameter 'status' cannot be null.");
+        else if (status !== undefined)
+            status && status.forEach(item => { url_ += "status=" + encodeURIComponent("" + item) + "&"; });
+        if (page === null)
+            throw new globalThis.Error("The parameter 'page' cannot be null.");
+        else if (page !== undefined)
+            url_ += "page=" + encodeURIComponent("" + page) + "&";
+        if (pageSize === null)
+            throw new globalThis.Error("The parameter 'pageSize' cannot be null.");
+        else if (pageSize !== undefined)
+            url_ += "pageSize=" + encodeURIComponent("" + pageSize) + "&";
+        if (sort === null)
+            throw new globalThis.Error("The parameter 'sort' cannot be null.");
+        else if (sort !== undefined)
+            url_ += "sort=" + encodeURIComponent("" + sort) + "&";
+        url_ = url_.replace(/[?&]$/, "");
+
+        let options_: RequestInit = {
+            method: "GET",
+            headers: {
+                "Accept": "application/json"
+            }
+        };
+
+        return this.http.fetch(url_, options_).then((_response: Response) => {
+            return this.processListInvoices(_response);
+        });
+    }
+
+    protected processListInvoices(response: Response): Promise<InvoiceQueuePageDto> {
+        const status = response.status;
+        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
+        if (status === 200) {
+            return response.text().then((_responseText) => {
+            let result200: any = null;
+            result200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver) as InvoiceQueuePageDto;
+            return result200;
+            });
+        } else if (status === 400) {
+            return response.text().then((_responseText) => {
+            let result400: any = null;
+            result400 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver) as InvoiceProblemDetails;
+            return throwException("Bad Request", status, _responseText, _headers, result400);
+            });
+        } else if (status === 500) {
+            return response.text().then((_responseText) => {
+            let result500: any = null;
+            result500 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver) as InvoiceProblemDetails;
+            return throwException("Internal Server Error", status, _responseText, _headers, result500);
+            });
+        } else if (status !== 200 && status !== 204) {
+            return response.text().then((_responseText) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            });
+        }
+        return Promise.resolve<InvoiceQueuePageDto>(null as any);
+    }
+
+    /**
+     * @param file (optional)
+     * @return Created
+     */
+    uploadInvoice(file: FileParameter | undefined): Promise<InvoiceDetailDto> {
+        let url_ = this.baseUrl + "/api/invoices";
+        url_ = url_.replace(/[?&]$/, "");
+
+        const content_ = new FormData();
+        if (file === null || file === undefined)
+            throw new globalThis.Error("The parameter 'file' cannot be null.");
+        else
+            content_.append("file", file.data, file.fileName ? file.fileName : "file");
+
+        let options_: RequestInit = {
+            body: content_,
+            method: "POST",
+            headers: {
+                "Accept": "application/json"
+            }
+        };
+
+        return this.http.fetch(url_, options_).then((_response: Response) => {
+            return this.processUploadInvoice(_response);
+        });
+    }
+
+    protected processUploadInvoice(response: Response): Promise<InvoiceDetailDto> {
+        const status = response.status;
+        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
+        if (status === 201) {
+            return response.text().then((_responseText) => {
+            let result201: any = null;
+            result201 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver) as InvoiceDetailDto;
+            return result201;
+            });
+        } else if (status === 400) {
+            return response.text().then((_responseText) => {
+            let result400: any = null;
+            result400 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver) as InvoiceProblemDetails;
+            return throwException("Bad Request", status, _responseText, _headers, result400);
+            });
+        } else if (status === 413) {
+            return response.text().then((_responseText) => {
+            let result413: any = null;
+            result413 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver) as InvoiceProblemDetails;
+            return throwException("Payload Too Large", status, _responseText, _headers, result413);
+            });
+        } else if (status === 500) {
+            return response.text().then((_responseText) => {
+            let result500: any = null;
+            result500 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver) as InvoiceProblemDetails;
+            return throwException("Internal Server Error", status, _responseText, _headers, result500);
+            });
+        } else if (status !== 200 && status !== 204) {
+            return response.text().then((_responseText) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            });
+        }
+        return Promise.resolve<InvoiceDetailDto>(null as any);
+    }
+
+    /**
+     * @return OK
+     */
+    rejectInvoice(id: string, body: RejectInvoiceRequest): Promise<InvoiceDetailDto> {
+        let url_ = this.baseUrl + "/api/invoices/{id}/reject";
+        if (id === undefined || id === null)
+            throw new globalThis.Error("The parameter 'id' must be defined.");
+        url_ = url_.replace("{id}", encodeURIComponent("" + id));
+        url_ = url_.replace(/[?&]$/, "");
+
+        const content_ = JSON.stringify(body);
+
+        let options_: RequestInit = {
+            body: content_,
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                "Accept": "application/json"
+            }
+        };
+
+        return this.http.fetch(url_, options_).then((_response: Response) => {
+            return this.processRejectInvoice(_response);
+        });
+    }
+
+    protected processRejectInvoice(response: Response): Promise<InvoiceDetailDto> {
+        const status = response.status;
+        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
+        if (status === 200) {
+            return response.text().then((_responseText) => {
+            let result200: any = null;
+            result200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver) as InvoiceDetailDto;
+            return result200;
+            });
+        } else if (status === 400) {
+            return response.text().then((_responseText) => {
+            let result400: any = null;
+            result400 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver) as InvoiceProblemDetails;
+            return throwException("Bad Request", status, _responseText, _headers, result400);
+            });
+        } else if (status === 404) {
+            return response.text().then((_responseText) => {
+            let result404: any = null;
+            result404 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver) as InvoiceProblemDetails;
+            return throwException("Not Found", status, _responseText, _headers, result404);
+            });
+        } else if (status === 409) {
+            return response.text().then((_responseText) => {
+            let result409: any = null;
+            result409 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver) as InvoiceProblemDetails;
+            return throwException("Conflict", status, _responseText, _headers, result409);
+            });
+        } else if (status === 500) {
+            return response.text().then((_responseText) => {
+            let result500: any = null;
+            result500 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver) as InvoiceProblemDetails;
+            return throwException("Internal Server Error", status, _responseText, _headers, result500);
+            });
+        } else if (status !== 200 && status !== 204) {
+            return response.text().then((_responseText) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            });
+        }
+        return Promise.resolve<InvoiceDetailDto>(null as any);
+    }
+
+    /**
+     * @return OK
+     */
+    validateInvoice(id: string, body: ValidateInvoiceRequest): Promise<InvoiceDetailDto> {
+        let url_ = this.baseUrl + "/api/invoices/{id}/validate";
+        if (id === undefined || id === null)
+            throw new globalThis.Error("The parameter 'id' must be defined.");
+        url_ = url_.replace("{id}", encodeURIComponent("" + id));
+        url_ = url_.replace(/[?&]$/, "");
+
+        const content_ = JSON.stringify(body);
+
+        let options_: RequestInit = {
+            body: content_,
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                "Accept": "application/json"
+            }
+        };
+
+        return this.http.fetch(url_, options_).then((_response: Response) => {
+            return this.processValidateInvoice(_response);
+        });
+    }
+
+    protected processValidateInvoice(response: Response): Promise<InvoiceDetailDto> {
+        const status = response.status;
+        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
+        if (status === 200) {
+            return response.text().then((_responseText) => {
+            let result200: any = null;
+            result200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver) as InvoiceDetailDto;
+            return result200;
+            });
+        } else if (status === 400) {
+            return response.text().then((_responseText) => {
+            let result400: any = null;
+            result400 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver) as InvoiceProblemDetails;
+            return throwException("Bad Request", status, _responseText, _headers, result400);
+            });
+        } else if (status === 404) {
+            return response.text().then((_responseText) => {
+            let result404: any = null;
+            result404 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver) as InvoiceProblemDetails;
+            return throwException("Not Found", status, _responseText, _headers, result404);
+            });
+        } else if (status === 409) {
+            return response.text().then((_responseText) => {
+            let result409: any = null;
+            result409 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver) as InvoiceProblemDetails;
+            return throwException("Conflict", status, _responseText, _headers, result409);
+            });
+        } else if (status === 500) {
+            return response.text().then((_responseText) => {
+            let result500: any = null;
+            result500 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver) as InvoiceProblemDetails;
+            return throwException("Internal Server Error", status, _responseText, _headers, result500);
+            });
+        } else if (status !== 200 && status !== 204) {
+            return response.text().then((_responseText) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            });
+        }
+        return Promise.resolve<InvoiceDetailDto>(null as any);
+    }
+}
+
+export interface AmountDraftDto {
+    currency: string | null;
+    subtotal: string | null;
+    taxAmount: string | null;
+    total: string | null;
+}
+
+export interface AmountFieldsDto {
+    currency: TextFieldDto;
+    subtotal: MoneyFieldDto;
+    taxAmount: MoneyFieldDto;
+    total: MoneyFieldDto;
+}
+
+export interface ApproveInvoiceRequest {
+    expectedVersion: number;
+}
+
+export interface AuditHistoryPageDto {
+    items: (InvoiceUploadedAuditEventDto | ExtractionCompletedAuditEventDto | ExtractionFailedAuditEventDto | DraftSavedAuditEventDto | ValidationCompletedAuditEventDto | InvoiceApprovedAuditEventDto | InvoiceRejectedAuditEventDto | DocumentIntegrityChangedAuditEventDto)[];
+    page: number;
+    pageSize: number;
+    totalItems: number;
+    totalPages: number;
+    hasPreviousPage: boolean;
+    hasNextPage: boolean;
+}
+
+export enum ConfidenceBand {
+    High = "high",
+    Medium = "medium",
+    Low = "low",
+    Unknown = "unknown",
+}
+
+export interface DateFieldDto {
+    value: string | null;
+    originalValue: string | null;
+    originalSource: FieldSource;
+    currentSource: FieldSource;
+    confidence: number | null;
+    confidenceBand: ConfidenceBand;
+    differsFromOriginal: boolean;
+    lastCorrectedAt: string | null;
+}
+
+export interface DatesAndTermsDraftDto {
+    invoiceDate: string | null;
+    dueDate: string | null;
+    paymentTerms: string | null;
+}
+
+export interface DatesAndTermsFieldsDto {
+    invoiceDate: DateFieldDto;
+    dueDate: DateFieldDto;
+    paymentTerms: TextFieldDto;
+    normalizedPaymentTermsDays: number | null;
+}
+
+export enum DecisionKind {
+    Approved = "approved",
+    Rejected = "rejected",
+}
+
+export enum DocumentIntegrityStatus {
+    Available = "available",
+    Missing = "missing",
+    Corrupt = "corrupt",
+}
+
+export enum DocumentTextSource {
+    NativeText = "nativeText",
+    Ocr = "ocr",
+}
+
+export interface FieldCorrectionDto {
+    id: string;
+    auditEventId: string;
+    field: InvoiceFieldKey;
+    previousValue: string | null;
+    newValue: string | null;
+    draftVersion: number;
+    occurredAt: string;
+}
+
+export enum FieldSource {
+    NativeText = "nativeText",
+    Ocr = "ocr",
+    AiInference = "aiInference",
+    Reviewer = "reviewer",
+}
+
+export interface InvoiceDecisionDto {
+    kind: DecisionKind;
+    decidedAt: string;
+    rejectionReason: string | null;
+}
+
+export interface InvoiceDetailDto {
+    id: string;
+    status: InvoiceStatus;
+    draftVersion: number;
+    lastValidatedVersion: number | null;
+    createdAt: string;
+    updatedAt: string;
+    document: InvoiceDocumentDto;
+    documentTextSource: DocumentTextSource | null;
+    fields: InvoiceFieldsDto | null;
+    reviewNotes: string | null;
+    summary: InvoiceSummaryDto;
+    currentValidation: ValidationRunDto | null;
+    corrections: FieldCorrectionDto[];
+    processingFailure: ProcessingFailureDto | null;
+    decision: InvoiceDecisionDto | null;
+}
+
+export interface InvoiceDocumentDto {
+    originalFilename: string;
+    mediaType: InvoiceDocumentDtoMediaType;
+    byteLength: number;
+    sha256: string;
+    pageCount: number;
+    integrityStatus: DocumentIntegrityStatus;
+}
+
+export interface InvoiceDraftInputDto {
+    supplier: SupplierDraftDto;
+    reference: ReferenceDraftDto;
+    datesAndTerms: DatesAndTermsDraftDto;
+    amounts: AmountDraftDto;
+    reviewNotes: string | null;
+}
+
+export interface InvoiceExportV1Dto {
+    schemaVersion: InvoiceExportV1DtoSchemaVersion;
+    invoice: InvoiceDetailDto;
+    auditHistory: (InvoiceUploadedAuditEventDto | ExtractionCompletedAuditEventDto | ExtractionFailedAuditEventDto | DraftSavedAuditEventDto | ValidationCompletedAuditEventDto | InvoiceApprovedAuditEventDto | InvoiceRejectedAuditEventDto | DocumentIntegrityChangedAuditEventDto)[];
+}
+
+export enum InvoiceFieldKey {
+    SupplierName = "supplierName",
+    SupplierRegistrationId = "supplierRegistrationId",
+    InvoiceNumber = "invoiceNumber",
+    PurchaseOrderNumber = "purchaseOrderNumber",
+    InvoiceDate = "invoiceDate",
+    DueDate = "dueDate",
+    PaymentTerms = "paymentTerms",
+    Currency = "currency",
+    Subtotal = "subtotal",
+    TaxAmount = "taxAmount",
+    Total = "total",
+    ReviewNotes = "reviewNotes",
+}
+
+export interface InvoiceFieldsDto {
+    supplier: SupplierFieldsDto;
+    reference: ReferenceFieldsDto;
+    datesAndTerms: DatesAndTermsFieldsDto;
+    amounts: AmountFieldsDto;
+}
+
+export interface InvoiceProblemDetails {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance: string;
+    code: string;
+    correlationId: string;
+    fields: { [key: string]: string[]; } | null;
+    currentVersion: number | null;
+}
+
+export interface InvoiceQueueItemDto {
+    id: string;
+    status: InvoiceStatus;
+    supplierName: string | null;
+    invoiceNumber: string | null;
+    invoiceDate: string | null;
+    total: string | null;
+    currency: string | null;
+    draftVersion: number;
+    warningCount: number;
+    errorCount: number;
+    exceptionCount: number;
+    processingFailure: ProcessingFailureDto | null;
+    createdAt: string;
+    updatedAt: string;
+}
+
+export interface InvoiceQueuePageDto {
+    items: InvoiceQueueItemDto[];
+    summary: InvoiceQueueSummaryDto;
+    page: number;
+    pageSize: number;
+    totalItems: number;
+    totalPages: number;
+    hasPreviousPage: boolean;
+    hasNextPage: boolean;
+}
+
+export interface InvoiceQueueSummaryDto {
+    totalInvoiceCount: number;
+    processingCount: number;
+    reviewRequiredCount: number;
+    readyForApprovalCount: number;
+    approvedCount: number;
+    rejectedCount: number;
+    processingFailedCount: number;
+    pendingReviewCount: number;
+    warningInvoiceCount: number;
+    errorInvoiceCount: number;
+}
+
+export enum InvoiceSort {
+    UpdatedAtDesc = "updatedAtDesc",
+    UpdatedAtAsc = "updatedAtAsc",
+    CreatedAtDesc = "createdAtDesc",
+    CreatedAtAsc = "createdAtAsc",
+}
+
+export enum InvoiceStatus {
+    Processing = "processing",
+    ReviewRequired = "reviewRequired",
+    ReadyForApproval = "readyForApproval",
+    Approved = "approved",
+    Rejected = "rejected",
+    ProcessingFailed = "processingFailed",
+}
+
+export interface InvoiceSummaryDto {
+    extractedFieldCount: number;
+    warningCount: number;
+    errorCount: number;
+    manualCorrectionCount: number;
+}
+
+export interface MoneyFieldDto {
+    value: string | null;
+    originalValue: string | null;
+    originalSource: FieldSource;
+    currentSource: FieldSource;
+    confidence: number | null;
+    confidenceBand: ConfidenceBand;
+    differsFromOriginal: boolean;
+    lastCorrectedAt: string | null;
+}
+
+export enum ProcessingFailureCode {
+    PDF_EXTRACTION_FAILED = "PDF_EXTRACTION_FAILED",
+    PDF_RENDER_FAILED = "PDF_RENDER_FAILED",
+    OCR_UNAVAILABLE = "OCR_UNAVAILABLE",
+    OCR_PAGE_TIMEOUT = "OCR_PAGE_TIMEOUT",
+    OCR_DOCUMENT_TIMEOUT = "OCR_DOCUMENT_TIMEOUT",
+    OCR_FAILED = "OCR_FAILED",
+    AI_TIMEOUT = "AI_TIMEOUT",
+    AI_UNAVAILABLE = "AI_UNAVAILABLE",
+    AI_REFUSED = "AI_REFUSED",
+    AI_RESPONSE_INCOMPLETE = "AI_RESPONSE_INCOMPLETE",
+    AI_RESPONSE_INVALID = "AI_RESPONSE_INVALID",
+    PROCESS_INTERRUPTED = "PROCESS_INTERRUPTED",
+    PROCESSING_FAILED = "PROCESSING_FAILED",
+}
+
+export interface ProcessingFailureDto {
+    stage: ProcessingStage;
+    code: ProcessingFailureCode;
+    message: string;
+    failedAt: string;
+}
+
+export enum ProcessingStage {
+    Upload = "upload",
+    PdfExtraction = "pdfExtraction",
+    Ocr = "ocr",
+    AiExtraction = "aiExtraction",
+    Parsing = "parsing",
+    Persistence = "persistence",
+    StartupRecovery = "startupRecovery",
+}
+
+export interface ReferenceDraftDto {
+    invoiceNumber: string | null;
+    purchaseOrderNumber: string | null;
+}
+
+export interface ReferenceFieldsDto {
+    invoiceNumber: TextFieldDto;
+    purchaseOrderNumber: TextFieldDto;
+}
+
+export interface RejectInvoiceRequest {
+    expectedVersion: number;
+    reason: string | null;
+}
+
+export interface SaveInvoiceDraftRequest {
+    expectedVersion: number;
+    draft: InvoiceDraftInputDto;
+}
+
+export interface SupplierDraftDto {
+    name: string | null;
+    registrationId: string | null;
+}
+
+export interface SupplierFieldsDto {
+    name: TextFieldDto;
+    registrationId: TextFieldDto;
+}
+
+export interface TextFieldDto {
+    value: string | null;
+    originalValue: string | null;
+    originalSource: FieldSource;
+    currentSource: FieldSource;
+    confidence: number | null;
+    confidenceBand: ConfidenceBand;
+    differsFromOriginal: boolean;
+    lastCorrectedAt: string | null;
+}
+
+export interface ValidateInvoiceRequest {
+    expectedVersion: number;
+}
+
+export enum ValidationCode {
+    REQUIRED_FIELD_MISSING = "REQUIRED_FIELD_MISSING",
+    AMOUNT_RECONCILIATION_FAILED = "AMOUNT_RECONCILIATION_FAILED",
+    NEGATIVE_AMOUNT_UNEXPECTED = "NEGATIVE_AMOUNT_UNEXPECTED",
+    DUE_DATE_BEFORE_INVOICE_DATE = "DUE_DATE_BEFORE_INVOICE_DATE",
+    PAYMENT_TERMS_MISMATCH = "PAYMENT_TERMS_MISMATCH",
+    POSSIBLE_DUPLICATE_INVOICE = "POSSIBLE_DUPLICATE_INVOICE",
+    CURRENCY_INVALID = "CURRENCY_INVALID",
+    LOW_EXTRACTION_CONFIDENCE = "LOW_EXTRACTION_CONFIDENCE",
+    INVOICE_DATE_IN_FUTURE = "INVOICE_DATE_IN_FUTURE",
+}
+
+export interface ValidationResultDto {
+    code: ValidationCode;
+    severity: ValidationSeverity;
+    message: string;
+    fields: InvoiceFieldKey[];
+    data: any;
+}
+
+export interface ValidationRunDto {
+    id: string;
+    draftVersion: number;
+    validatedAt: string;
+    warningCount: number;
+    errorCount: number;
+    results: (RequiredFieldMissingValidationResultDto | AmountReconciliationFailedValidationResultDto | NegativeAmountUnexpectedValidationResultDto | DueDateBeforeInvoiceDateValidationResultDto | PaymentTermsMismatchValidationResultDto | PossibleDuplicateInvoiceValidationResultDto | CurrencyInvalidValidationResultDto | LowExtractionConfidenceValidationResultDto | InvoiceDateInFutureValidationResultDto)[];
+}
+
+export enum ValidationSeverity {
+    Warning = "warning",
+    Error = "error",
+}
+
+export enum ValidationTrigger {
+    Initial = "initial",
+    Explicit = "explicit",
+    Approval = "approval",
+}
+
+export enum AuditActor {
+    System = "system",
+    Reviewer = "reviewer",
+}
+
+export enum AuditEventType {
+    InvoiceUploaded = "invoiceUploaded",
+    ExtractionCompleted = "extractionCompleted",
+    ExtractionFailed = "extractionFailed",
+    DraftSaved = "draftSaved",
+    ValidationCompleted = "validationCompleted",
+    InvoiceApproved = "invoiceApproved",
+    InvoiceRejected = "invoiceRejected",
+    DocumentIntegrityChanged = "documentIntegrityChanged",
+}
+
+export interface DuplicateInvoiceMatchDto {
+    invoiceId: string;
+    status: InvoiceStatus;
+}
+
+export interface RequiredFieldMissingValidationDataDto {
+    missingField: InvoiceFieldKey;
+}
+
+export interface AmountReconciliationFailedValidationDataDto {
+    currency: string;
+    subtotal: string;
+    taxAmount: string;
+    expectedTotal: string;
+    actualTotal: string;
+    difference: string;
+    tolerance: string;
+}
+
+export interface NegativeAmountUnexpectedValidationDataDto {
+    field: InvoiceFieldKey;
+    amount: string;
+}
+
+export interface DueDateBeforeInvoiceDateValidationDataDto {
+    invoiceDate: string;
+    dueDate: string;
+}
+
+export interface PaymentTermsMismatchValidationDataDto {
+    invoiceDate: string;
+    dueDate: string;
+    normalizedPaymentTermsDays: number;
+    calculatedDueDate: string;
+}
+
+export interface PossibleDuplicateInvoiceValidationDataDto {
+    matches: DuplicateInvoiceMatchDto[];
+}
+
+export interface CurrencyInvalidValidationDataDto {
+    value: string | null;
+    allowedCurrencies: string[];
+}
+
+export interface LowExtractionConfidenceValidationDataDto {
+    field: InvoiceFieldKey;
+    confidence: number | null;
+    confidenceBand: LowExtractionConfidenceValidationDataDtoConfidenceBand;
+}
+
+export interface InvoiceDateInFutureValidationDataDto {
+    invoiceDate: string;
+    currentLocalDate: string;
+}
+
+export interface RequiredFieldMissingValidationResultDto extends ValidationResultDto {
+    data: RequiredFieldMissingValidationDataDto;
+
+    [key: string]: any;
+}
+
+export interface AmountReconciliationFailedValidationResultDto extends ValidationResultDto {
+    data: AmountReconciliationFailedValidationDataDto;
+
+    [key: string]: any;
+}
+
+export interface NegativeAmountUnexpectedValidationResultDto extends ValidationResultDto {
+    data: NegativeAmountUnexpectedValidationDataDto;
+
+    [key: string]: any;
+}
+
+export interface DueDateBeforeInvoiceDateValidationResultDto extends ValidationResultDto {
+    data: DueDateBeforeInvoiceDateValidationDataDto;
+
+    [key: string]: any;
+}
+
+export interface PaymentTermsMismatchValidationResultDto extends ValidationResultDto {
+    data: PaymentTermsMismatchValidationDataDto;
+
+    [key: string]: any;
+}
+
+export interface PossibleDuplicateInvoiceValidationResultDto extends ValidationResultDto {
+    data: PossibleDuplicateInvoiceValidationDataDto;
+
+    [key: string]: any;
+}
+
+export interface CurrencyInvalidValidationResultDto extends ValidationResultDto {
+    data: CurrencyInvalidValidationDataDto;
+
+    [key: string]: any;
+}
+
+export interface LowExtractionConfidenceValidationResultDto extends ValidationResultDto {
+    data: LowExtractionConfidenceValidationDataDto;
+
+    [key: string]: any;
+}
+
+export interface InvoiceDateInFutureValidationResultDto extends ValidationResultDto {
+    data: InvoiceDateInFutureValidationDataDto;
+
+    [key: string]: any;
+}
+
+export interface InvoiceUploadedAuditDetailsDto {
+    document: InvoiceDocumentDto;
+}
+
+export interface ExtractionCompletedAuditDetailsDto {
+    documentTextSource: DocumentTextSource;
+    extractedFieldCount: number;
+}
+
+export interface ExtractionFailedAuditDetailsDto {
+    failure: ProcessingFailureDto;
+}
+
+export interface DraftSavedAuditDetailsDto {
+    isNoOp: boolean;
+    changes: FieldCorrectionDto[];
+}
+
+export interface ValidationCompletedAuditDetailsDto {
+    trigger: ValidationTrigger;
+    validationRunId: string;
+    warningCount: number;
+    errorCount: number;
+    resultingStatus: InvoiceStatus;
+}
+
+export interface InvoiceApprovedAuditDetailsDto {
+    decidedAt: string;
+}
+
+export interface InvoiceRejectedAuditDetailsDto {
+    decidedAt: string;
+    rejectionReason: string;
+}
+
+export interface DocumentIntegrityChangedAuditDetailsDto {
+    previousStatus: DocumentIntegrityStatus;
+    currentStatus: DocumentIntegrityStatus;
+}
+
+export interface AuditEventDto {
+    id: string;
+    invoiceId: string;
+    type: AuditEventType;
+    actor: AuditActor;
+    occurredAt: string;
+    draftVersion: number;
+    details: any;
+}
+
+export interface InvoiceUploadedAuditEventDto extends AuditEventDto {
+    details: InvoiceUploadedAuditDetailsDto;
+
+    [key: string]: any;
+}
+
+export interface ExtractionCompletedAuditEventDto extends AuditEventDto {
+    details: ExtractionCompletedAuditDetailsDto;
+
+    [key: string]: any;
+}
+
+export interface ExtractionFailedAuditEventDto extends AuditEventDto {
+    details: ExtractionFailedAuditDetailsDto;
+
+    [key: string]: any;
+}
+
+export interface DraftSavedAuditEventDto extends AuditEventDto {
+    details: DraftSavedAuditDetailsDto;
+
+    [key: string]: any;
+}
+
+export interface ValidationCompletedAuditEventDto extends AuditEventDto {
+    details: ValidationCompletedAuditDetailsDto;
+
+    [key: string]: any;
+}
+
+export interface InvoiceApprovedAuditEventDto extends AuditEventDto {
+    details: InvoiceApprovedAuditDetailsDto;
+
+    [key: string]: any;
+}
+
+export interface InvoiceRejectedAuditEventDto extends AuditEventDto {
+    details: InvoiceRejectedAuditDetailsDto;
+
+    [key: string]: any;
+}
+
+export interface DocumentIntegrityChangedAuditEventDto extends AuditEventDto {
+    details: DocumentIntegrityChangedAuditDetailsDto;
+
+    [key: string]: any;
+}
+
+export enum InvoiceDocumentDtoMediaType {
+    Application_pdf = "application/pdf",
+}
+
+export enum InvoiceExportV1DtoSchemaVersion {
+    _1_0 = "1.0",
+}
+
+export enum LowExtractionConfidenceValidationDataDtoConfidenceBand {
+    Low = "low",
+    Unknown = "unknown",
+}
+
+export interface FileParameter {
+    data: any;
+    fileName: string;
+}
+
+export interface FileResponse {
+    data: Blob;
+    status: number;
+    fileName?: string;
+    headers?: { [name: string]: any };
 }
 
 export class ApiException extends Error {

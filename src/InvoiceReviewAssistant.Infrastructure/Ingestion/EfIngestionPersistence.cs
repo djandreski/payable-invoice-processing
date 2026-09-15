@@ -138,6 +138,7 @@ public sealed class EfIngestionPersistence(
             .Include(row => row.Document)
             .Include(row => row.FieldMetadata)
             .Include(row => row.ValidationRuns).ThenInclude(run => run.Results)
+            .AsSplitQuery()
             .SingleAsync(row => row.Id == invoiceId.Value, cancellationToken);
         if (!string.Equals(entity.Status, nameof(InvoiceStatus.Processing), StringComparison.Ordinal))
         {

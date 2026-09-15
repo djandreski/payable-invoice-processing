@@ -19,6 +19,7 @@ public sealed class EfInvoiceRepository(InvoiceDbContext context) : IInvoiceRepo
             .Include(invoice => invoice.Document)
             .Include(invoice => invoice.FieldMetadata)
             .Include(invoice => invoice.ValidationRuns).ThenInclude(run => run.Results)
+            .AsSplitQuery()
             .SingleOrDefaultAsync(invoice => invoice.Id == id.Value, cancellationToken);
         if (entity is null)
         {

@@ -1,0 +1,9 @@
+.completed-record { display: grid; gap: 1rem; }
+.completed-record > header, .completed-record > section { padding: 1rem 1.25rem; border: 1px solid var(--slate-300); border-radius: .5rem; background: var(--warm-white); box-shadow: var(--shadow-soft); }
+.completed-record h1, .completed-record h2 { margin: 0 0 .7rem; color: var(--ink-950); }
+.completed-record h1 { font-size: 1.35rem; }.completed-record h2 { font-size: 1.05rem; }
+.completed-record > :is(header, section) > :last-child { margin-bottom: 0; }
+.completed-record__fields { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 1rem; margin: 0; }
+.completed-record__field { min-width: 0; }.completed-record__field dt { color: var(--slate-600); font-size: .84rem; font-weight: 700; }.completed-record__field dd { margin: .25rem 0 0; overflow-wrap: anywhere; }.completed-record__field dd:nth-child(2) { color: var(--ink-950); font-variant-numeric: tabular-nums; }
+.completed-record ol, .completed-record ul { display: grid; gap: .65rem; margin: .75rem 0; padding-left: 1.25rem; }.completed-record li { line-height: 1.45; }
+@media (max-width: 40rem) { .completed-record__fields { grid-template-columns: 1fr; } }

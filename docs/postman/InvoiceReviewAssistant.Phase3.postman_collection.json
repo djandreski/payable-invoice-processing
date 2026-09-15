@@ -1,0 +1,745 @@
+{
+  "info": {
+    "_postman_id": "cfc12d42-3289-4a5f-93ca-d59f7792c391",
+    "name": "Invoice Review Assistant - Phase 3",
+    "description": "Manual verification of all ten Phase 3 invoice API operations. Run the folders in order. Before running, set `pdfPath` to a valid, text-native PDF containing at least 100 meaningful characters. The scripts retain invoice IDs and draft versions automatically. Use a fresh isolated Storage__RootPath when starting the API so duplicate detection from earlier runs cannot affect approval.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "01 - Approval journey",
+      "description": "Uploads one invoice, replaces its draft with deterministic valid values, validates it, approves it, and verifies its read surfaces.",
+      "item": [
+        {
+          "name": "1. Upload invoice for approval",
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.collectionVariables.set('approvalRunSuffix', Date.now().toString());"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Created', () => pm.response.to.have.status(201));",
+                  "pm.test('Returns a persisted invoice at draft version 1', () => {",
+                  "  const body = pm.response.json();",
+                  "  pm.expect(body.id).to.match(/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/);",
+                  "  pm.expect(body.draftVersion).to.eql(1);",
+                  "  pm.expect(body.status).to.be.oneOf(['reviewRequired', 'processingFailed']);",
+                  "  pm.collectionVariables.set('approvalInvoiceId', body.id);",
+                  "  pm.collectionVariables.set('approvalDraftVersion', String(body.draftVersion));",
+                  "  pm.collectionVariables.set('approvalStaleVersion', String(body.draftVersion));",
+                  "});",
+                  "pm.test('Location points to the invoice', () => {",
+                  "  pm.expect(pm.response.headers.get('Location')).to.include('/api/invoices/');",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "file",
+                  "description": "Set the collection variable pdfPath or select a local text-native PDF in the Postman UI.",
+                  "type": "file",
+                  "src": "{{pdfPath}}"
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/invoices",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "invoices"]
+            },
+            "description": "Creates the invoice and stores its ID and version for the remaining requests. A processingFailed response is still 201 by contract, but the remaining approval requests require a successful extraction."
+          }
+        },
+        {
+          "name": "2. Get invoice detail",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('OK', () => pm.response.to.have.status(200));",
+                  "pm.test('Returns the selected invoice', () => {",
+                  "  const body = pm.response.json();",
+                  "  pm.expect(body.id).to.eql(pm.collectionVariables.get('approvalInvoiceId'));",
+                  "  pm.expect(body.document.mediaType).to.eql('application/pdf');",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/invoices/{{approvalInvoiceId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "invoices", "{{approvalInvoiceId}}"]
+            }
+          }
+        },
+        {
+          "name": "3. Save valid replacement draft",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('OK', () => pm.response.to.have.status(200));",
+                  "pm.test('Changed save increments the draft version once', () => {",
+                  "  const body = pm.response.json();",
+                  "  const oldVersion = Number(pm.collectionVariables.get('approvalDraftVersion'));",
+                  "  pm.expect(body.draftVersion).to.eql(oldVersion + 1);",
+                  "  pm.expect(body.fields.reference.invoiceNumber.value).to.eql('APP-' + pm.collectionVariables.get('approvalRunSuffix'));",
+                  "  pm.collectionVariables.set('approvalDraftVersion', String(body.draftVersion));",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"expectedVersion\": {{approvalDraftVersion}},\n  \"draft\": {\n    \"supplier\": {\n      \"name\": \"Northwind Supplies\",\n      \"registrationId\": \"REG-1001\"\n    },\n    \"reference\": {\n      \"invoiceNumber\": \"APP-{{approvalRunSuffix}}\",\n      \"purchaseOrderNumber\": \"PO-9001\"\n    },\n    \"datesAndTerms\": {\n      \"invoiceDate\": \"2026-09-01\",\n      \"dueDate\": \"2026-10-01\",\n      \"paymentTerms\": \"Net 30\"\n    },\n    \"amounts\": {\n      \"currency\": \"EUR\",\n      \"subtotal\": \"1000.00\",\n      \"taxAmount\": \"180.00\",\n      \"total\": \"1180.00\"\n    },\n    \"reviewNotes\": \"Phase 3 Postman approval journey\"\n  }\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/invoices/{{approvalInvoiceId}}/draft",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "invoices", "{{approvalInvoiceId}}", "draft"]
+            },
+            "description": "Draft saves are full replacements. All nested objects and nullable members are intentionally present, and money values use exact two-decimal strings."
+          }
+        },
+        {
+          "name": "4. Validate invoice",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('OK', () => pm.response.to.have.status(200));",
+                  "pm.test('Validation is current and permits approval', () => {",
+                  "  const body = pm.response.json();",
+                  "  const version = Number(pm.collectionVariables.get('approvalDraftVersion'));",
+                  "  pm.expect(body.draftVersion).to.eql(version);",
+                  "  pm.expect(body.lastValidatedVersion).to.eql(version);",
+                  "  pm.expect(body.currentValidation.errorCount).to.eql(0);",
+                  "  pm.expect(body.status).to.eql('readyForApproval');",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"expectedVersion\": {{approvalDraftVersion}}\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/invoices/{{approvalInvoiceId}}/validate",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "invoices", "{{approvalInvoiceId}}", "validate"]
+            }
+          }
+        },
+        {
+          "name": "5. Export before decision returns conflict",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Conflict', () => pm.response.to.have.status(409));",
+                  "pm.test('Uses the terminal-only export problem code', () => {",
+                  "  const body = pm.response.json();",
+                  "  pm.expect(body.code).to.eql('INVOICE_STATE_CONFLICT');",
+                  "  pm.expect(body.currentVersion).to.eql(Number(pm.collectionVariables.get('approvalDraftVersion')));",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/invoices/{{approvalInvoiceId}}/export",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "invoices", "{{approvalInvoiceId}}", "export"]
+            }
+          }
+        },
+        {
+          "name": "6. Approve invoice",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('OK', () => pm.response.to.have.status(200));",
+                  "pm.test('Invoice is terminal and approved', () => {",
+                  "  const body = pm.response.json();",
+                  "  pm.expect(body.status).to.eql('approved');",
+                  "  pm.expect(body.draftVersion).to.eql(Number(pm.collectionVariables.get('approvalDraftVersion')));",
+                  "  pm.expect(body.decision.kind).to.eql('approved');",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"expectedVersion\": {{approvalDraftVersion}}\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/invoices/{{approvalInvoiceId}}/approve",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "invoices", "{{approvalInvoiceId}}", "approve"]
+            }
+          }
+        },
+        {
+          "name": "7. Get audit history",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('OK', () => pm.response.to.have.status(200));",
+                  "pm.test('History is paged and includes approval', () => {",
+                  "  const body = pm.response.json();",
+                  "  pm.expect(body.page).to.eql(1);",
+                  "  pm.expect(body.pageSize).to.eql(50);",
+                  "  pm.expect(body.items.map(item => item.type)).to.include('invoiceApproved');",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/invoices/{{approvalInvoiceId}}/history?page=1&pageSize=50",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "invoices", "{{approvalInvoiceId}}", "history"],
+              "query": [
+                { "key": "page", "value": "1" },
+                { "key": "pageSize", "value": "50" }
+              ]
+            }
+          }
+        },
+        {
+          "name": "8. Get complete source PDF",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('OK', () => pm.response.to.have.status(200));",
+                  "pm.test('Returns a safe inline PDF response', () => {",
+                  "  pm.expect(pm.response.headers.get('Content-Type')).to.include('application/pdf');",
+                  "  pm.expect(pm.response.headers.get('Content-Disposition')).to.include('inline');",
+                  "  pm.expect(pm.response.headers.get('X-Content-Type-Options')).to.eql('nosniff');",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/invoices/{{approvalInvoiceId}}/document",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "invoices", "{{approvalInvoiceId}}", "document"]
+            }
+          }
+        },
+        {
+          "name": "9. Get PDF byte range",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Partial content', () => pm.response.to.have.status(206));",
+                  "pm.test('Returns the requested byte range', () => {",
+                  "  pm.expect(pm.response.headers.get('Content-Range')).to.match(/^bytes 0-99\\/\\d+$/);",
+                  "  pm.expect(pm.response.headers.get('Content-Type')).to.include('application/pdf');",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Range",
+                "value": "bytes=0-99"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/invoices/{{approvalInvoiceId}}/document",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "invoices", "{{approvalInvoiceId}}", "document"]
+            }
+          }
+        },
+        {
+          "name": "10. Export approved invoice",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('OK', () => pm.response.to.have.status(200));",
+                  "pm.test('Returns the versioned complete export', () => {",
+                  "  const body = pm.response.json();",
+                  "  pm.expect(body.schemaVersion).to.eql('1.0');",
+                  "  pm.expect(body.invoice.status).to.eql('approved');",
+                  "  pm.expect(body.auditHistory.map(item => item.type)).to.include('invoiceApproved');",
+                  "  pm.expect(pm.response.headers.get('Content-Disposition')).to.include('attachment');",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/invoices/{{approvalInvoiceId}}/export",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "invoices", "{{approvalInvoiceId}}", "export"]
+            }
+          }
+        },
+        {
+          "name": "11. Stale draft save returns version conflict",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Conflict', () => pm.response.to.have.status(409));",
+                  "pm.test('Version conflict wins before terminal-state conflict', () => {",
+                  "  const body = pm.response.json();",
+                  "  pm.expect(body.code).to.eql('INVOICE_VERSION_CONFLICT');",
+                  "  pm.expect(body.currentVersion).to.eql(Number(pm.collectionVariables.get('approvalDraftVersion')));",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"expectedVersion\": {{approvalStaleVersion}},\n  \"draft\": {\n    \"supplier\": { \"name\": \"Stale Edit\", \"registrationId\": null },\n    \"reference\": { \"invoiceNumber\": \"STALE-{{approvalRunSuffix}}\", \"purchaseOrderNumber\": null },\n    \"datesAndTerms\": { \"invoiceDate\": null, \"dueDate\": null, \"paymentTerms\": null },\n    \"amounts\": { \"currency\": null, \"subtotal\": null, \"taxAmount\": null, \"total\": null },\n    \"reviewNotes\": null\n  }\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/invoices/{{approvalInvoiceId}}/draft",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "invoices", "{{approvalInvoiceId}}", "draft"]
+            }
+          }
+        },
+        {
+          "name": "12. Current-version draft save returns terminal-state conflict",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Conflict', () => pm.response.to.have.status(409));",
+                  "pm.test('Approved invoices are read-only', () => {",
+                  "  const body = pm.response.json();",
+                  "  pm.expect(body.code).to.eql('INVOICE_STATE_CONFLICT');",
+                  "  pm.expect(body.currentVersion).to.eql(Number(pm.collectionVariables.get('approvalDraftVersion')));",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"expectedVersion\": {{approvalDraftVersion}},\n  \"draft\": {\n    \"supplier\": { \"name\": \"Terminal Edit\", \"registrationId\": null },\n    \"reference\": { \"invoiceNumber\": \"TERMINAL-{{approvalRunSuffix}}\", \"purchaseOrderNumber\": null },\n    \"datesAndTerms\": { \"invoiceDate\": null, \"dueDate\": null, \"paymentTerms\": null },\n    \"amounts\": { \"currency\": null, \"subtotal\": null, \"taxAmount\": null, \"total\": null },\n    \"reviewNotes\": null\n  }\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/invoices/{{approvalInvoiceId}}/draft",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "invoices", "{{approvalInvoiceId}}", "draft"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "02 - Rejection journey",
+      "description": "Uploads a second invoice so rejection and rejected export can be exercised without conflicting with the approval journey's terminal invoice.",
+      "item": [
+        {
+          "name": "1. Upload invoice for rejection",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Created', () => pm.response.to.have.status(201));",
+                  "pm.test('Stores the rejection invoice context', () => {",
+                  "  const body = pm.response.json();",
+                  "  pm.expect(body.status).to.be.oneOf(['reviewRequired', 'processingFailed']);",
+                  "  pm.collectionVariables.set('rejectionInvoiceId', body.id);",
+                  "  pm.collectionVariables.set('rejectionDraftVersion', String(body.draftVersion));",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "file",
+                  "description": "Uses the same synthetic PDF as the approval journey.",
+                  "type": "file",
+                  "src": "{{pdfPath}}"
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/invoices",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "invoices"]
+            }
+          }
+        },
+        {
+          "name": "2. Reject invoice",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('OK', () => pm.response.to.have.status(200));",
+                  "pm.test('Invoice is terminal and rejected', () => {",
+                  "  const body = pm.response.json();",
+                  "  pm.expect(body.status).to.eql('rejected');",
+                  "  pm.expect(body.decision.kind).to.eql('rejected');",
+                  "  pm.expect(body.decision.rejectionReason).to.eql('Rejected during Phase 3 manual verification.');",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"expectedVersion\": {{rejectionDraftVersion}},\n  \"reason\": \"Rejected during Phase 3 manual verification.\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/invoices/{{rejectionInvoiceId}}/reject",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "invoices", "{{rejectionInvoiceId}}", "reject"]
+            }
+          }
+        },
+        {
+          "name": "3. Get rejection history",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('OK', () => pm.response.to.have.status(200));",
+                  "pm.test('History includes rejection', () => {",
+                  "  const body = pm.response.json();",
+                  "  pm.expect(body.items.map(item => item.type)).to.include('invoiceRejected');",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/invoices/{{rejectionInvoiceId}}/history?page=1&pageSize=50",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "invoices", "{{rejectionInvoiceId}}", "history"],
+              "query": [
+                { "key": "page", "value": "1" },
+                { "key": "pageSize", "value": "50" }
+              ]
+            }
+          }
+        },
+        {
+          "name": "4. Export rejected invoice",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('OK', () => pm.response.to.have.status(200));",
+                  "pm.test('Export contains the rejection decision', () => {",
+                  "  const body = pm.response.json();",
+                  "  pm.expect(body.schemaVersion).to.eql('1.0');",
+                  "  pm.expect(body.invoice.status).to.eql('rejected');",
+                  "  pm.expect(body.auditHistory.map(item => item.type)).to.include('invoiceRejected');",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/invoices/{{rejectionInvoiceId}}/export",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "invoices", "{{rejectionInvoiceId}}", "export"]
+            }
+          }
+        },
+        {
+          "name": "5. Validate rejected invoice returns terminal-state conflict",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Conflict', () => pm.response.to.have.status(409));",
+                  "pm.test('Rejected invoices are read-only', () => {",
+                  "  const body = pm.response.json();",
+                  "  pm.expect(body.code).to.eql('INVOICE_STATE_CONFLICT');",
+                  "  pm.expect(body.currentVersion).to.eql(Number(pm.collectionVariables.get('rejectionDraftVersion')));",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"expectedVersion\": {{rejectionDraftVersion}}\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/invoices/{{rejectionInvoiceId}}/validate",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "invoices", "{{rejectionInvoiceId}}", "validate"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "03 - Queue verification",
+      "description": "Exercises repeated status filters, pagination, and deterministic sorting after both journeys have completed.",
+      "item": [
+        {
+          "name": "List approved and rejected invoices",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('OK', () => pm.response.to.have.status(200));",
+                  "pm.test('Queue honors repeated terminal-status filters', () => {",
+                  "  const body = pm.response.json();",
+                  "  pm.expect(body.page).to.eql(1);",
+                  "  pm.expect(body.pageSize).to.eql(25);",
+                  "  pm.expect(body.items.every(item => ['approved', 'rejected'].includes(item.status))).to.eql(true);",
+                  "  pm.expect(body.items.map(item => item.id)).to.include(pm.collectionVariables.get('approvalInvoiceId'));",
+                  "  pm.expect(body.items.map(item => item.id)).to.include(pm.collectionVariables.get('rejectionInvoiceId'));",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/invoices?status=approved&status=rejected&page=1&pageSize=25&sort=updatedAtDesc",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "invoices"],
+              "query": [
+                { "key": "status", "value": "approved" },
+                { "key": "status", "value": "rejected" },
+                { "key": "page", "value": "1" },
+                { "key": "pageSize", "value": "25" },
+                { "key": "sort", "value": "updatedAtDesc" }
+              ]
+            }
+          }
+        }
+      ]
+    }
+  ],
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://127.0.0.1:5190",
+      "type": "string"
+    },
+    {
+      "key": "pdfPath",
+      "value": "C:\\path\\to\\sample-invoice.pdf",
+      "type": "string"
+    },
+    {
+      "key": "approvalRunSuffix",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "approvalInvoiceId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "approvalDraftVersion",
+      "value": "1",
+      "type": "string"
+    },
+    {
+      "key": "approvalStaleVersion",
+      "value": "1",
+      "type": "string"
+    },
+    {
+      "key": "rejectionInvoiceId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "rejectionDraftVersion",
+      "value": "1",
+      "type": "string"
+    }
+  ]
+}

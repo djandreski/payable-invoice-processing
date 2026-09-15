@@ -171,6 +171,12 @@ public sealed class IngestionFailureCatalogTests
         Assert.DoesNotContain(factory.RootPath, raw, StringComparison.OrdinalIgnoreCase);
         await AssertProblemAsync(response, failureCase.Status, failureCase.Code);
         await AssertNoResourceOrFileAsync(factory);
+
+        var logs = string.Join(Environment.NewLine, factory.Logs.Entries);
+        Assert.DoesNotContain(SensitiveFilename, logs, StringComparison.Ordinal);
+        Assert.DoesNotContain(SensitiveProviderOutput, logs, StringComparison.Ordinal);
+        Assert.DoesNotContain(SensitiveCredential, logs, StringComparison.Ordinal);
+        Assert.DoesNotContain(factory.RootPath, logs, StringComparison.OrdinalIgnoreCase);
     }
 
     [Fact]

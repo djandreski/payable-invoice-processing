@@ -1,28 +1,38 @@
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { render, screen } from '@testing-library/react';
-import userEvent from '@testing-library/user-event';
-import { MemoryRouter } from 'react-router-dom';
-import { describe, expect, it } from 'vitest';
+import { createMemoryRouter, RouterProvider } from 'react-router-dom';
+import { afterEach, describe, expect, it, vi } from 'vitest';
+import { invoiceApi } from '../api/invoiceApi';
+import { buildInvoice, emptyQueue } from '../test/invoiceBuilders';
 import { AppRoutes } from './AppRoutes';
 
-describe('application route shells', () => {
-  it('renders the accessible invoice queue shell', () => {
-    render(<MemoryRouter initialEntries={['/']}><AppRoutes /></MemoryRouter>);
+vi.mock('../features/invoice-review/PdfReviewPanel', () => ({ PdfReviewPanel: () => <section aria-label="Source invoice">PDF preview</section> }));
 
-    expect(screen.getByRole('heading', { name: 'Invoice queue' })).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: 'Upload invoice' })).toBeDisabled();
+function renderRoutes(entry: string) {
+  const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } });
+  const router = createMemoryRouter([{ path: '*', element: <AppRoutes /> }], { initialEntries: [entry] });
+  render(<QueryClientProvider client={queryClient}><RouterProvider router={router} /></QueryClientProvider>);
+}
+
+afterEach(() => vi.restoreAllMocks());
+
+describe('application routes', () => {
+  it('renders the connected invoice queue and upload action', async () => {
+    vi.spyOn(invoiceApi, 'listInvoices').mockResolvedValue(emptyQueue());
+    renderRoutes('/');
+
+    expect(await screen.findByRole('heading', { name: 'Invoice queue' })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Upload invoice' })).toBeEnabled();
     expect(screen.getByRole('navigation', { name: 'Primary navigation' })).toBeInTheDocument();
   });
 
-  it('renders an invoice workspace shell and supports keyboard return to the queue', async () => {
-    const user = userEvent.setup();
-    render(<MemoryRouter initialEntries={['/invoices/inv-042']}><AppRoutes /></MemoryRouter>);
+  it('loads the invoice workspace through the detail adapter', async () => {
+    vi.spyOn(invoiceApi, 'getInvoice').mockResolvedValue(buildInvoice());
+    renderRoutes('/invoices/invoice-001');
 
+    expect(await screen.findByRole('form', { name: 'Invoice draft' })).toBeInTheDocument();
     expect(screen.getByRole('heading', { name: 'Invoice review' })).toBeInTheDocument();
-    expect(screen.getByText('inv-042')).toHaveClass('numeric-value');
-
-    await user.tab();
-    expect(screen.getByRole('link', { name: 'Invoice Review Assistant home' })).toHaveFocus();
-    await user.keyboard('{Tab}{Tab}{Enter}');
-    expect(screen.getByRole('heading', { name: 'Invoice queue' })).toBeInTheDocument();
+    expect(screen.getByLabelText('Source invoice')).toBeInTheDocument();
+    expect(screen.getByDisplayValue('INV-001')).toBeInTheDocument();
   });
 });

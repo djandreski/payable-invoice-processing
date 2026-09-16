@@ -5,6 +5,7 @@ import { MemoryRouter } from 'react-router-dom';
 import { describe, expect, it, vi } from 'vitest';
 import { invoiceApi } from '../../api/invoiceApi';
 import { InvoiceStatus, type InvoiceQueuePageDto } from '../../api/generated/client';
+import { assertNoSeriousAccessibilityViolations } from '../../test/accessibility';
 import { QueueRoute } from './QueueRoute';
 
 vi.mock('../invoice-upload/UploadInvoiceDialog', () => ({ UploadInvoiceDialog: () => <button type="button">Upload invoice</button> }));
@@ -18,6 +19,12 @@ function renderQueue(entry = '/'): void {
 }
 
 describe('QueueRoute', () => {
+  it('has no serious automated accessibility violations', async () => {
+    vi.spyOn(invoiceApi, 'listInvoices').mockResolvedValue(page);
+    const { container } = renderQueueForAccessibility('/');
+    await screen.findByText('Northwind');
+    await assertNoSeriousAccessibilityViolations(container);
+  });
   it('restores filters from the route and renders formatted, color-independent queue data', async () => {
     const list = vi.spyOn(invoiceApi, 'listInvoices').mockResolvedValue(page);
     renderQueue('/?search=%20Northwind%20&status=readyForApproval&page=2');
@@ -80,3 +87,8 @@ describe('QueueRoute', () => {
     expect(screen.getByRole('button', { name: 'Try again' })).toBeInTheDocument();
   });
 });
+
+function renderQueueForAccessibility(entry: string) {
+  const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } });
+  return render(<QueryClientProvider client={queryClient}><MemoryRouter initialEntries={[entry]}><QueueRoute /></MemoryRouter></QueryClientProvider>);
+}

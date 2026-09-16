@@ -6,7 +6,13 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\..\src\InvoiceReviewAssistant.Api\InvoiceReviewAssistant.Api.csproj" />
+    <ProjectReference Include="..\..\src\InvoiceReviewAssistant.Infrastructure\InvoiceReviewAssistant.Infrastructure.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
     <PackageReference Include="coverlet.collector" PrivateAssets="all" />
+    <PackageReference Include="Microsoft.AspNetCore.Mvc.Testing" />
     <PackageReference Include="Microsoft.NET.Test.Sdk" />
     <PackageReference Include="Microsoft.Playwright" />
     <PackageReference Include="xunit" />

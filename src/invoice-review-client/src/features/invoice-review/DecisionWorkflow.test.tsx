@@ -4,6 +4,7 @@ import { FormProvider, useForm } from 'react-hook-form';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { InvoiceStatus, type InvoiceDetailDto, type InvoiceDraftInputDto } from '../../api/generated/client';
 import { InvoiceApiError, invoiceApi, invoiceQueryKeys } from '../../api/invoiceApi';
+import { assertNoSeriousAccessibilityViolations } from '../../test/accessibility';
 import { canApproveInvoice, canRejectInvoice, DecisionWorkflow } from './DecisionWorkflow';
 
 const draft: InvoiceDraftInputDto = { supplier: { name: 'Northwind', registrationId: null }, reference: { invoiceNumber: 'INV-1', purchaseOrderNumber: null }, datesAndTerms: { invoiceDate: '2026-09-01', dueDate: null, paymentTerms: null }, amounts: { currency: 'USD', subtotal: '10.00', taxAmount: '0.00', total: '10.00' }, reviewNotes: null };
@@ -16,13 +17,21 @@ function Harness({ detail = invoice }: { detail?: InvoiceDetailDto }) {
 
 function renderWorkflow(detail = invoice) {
   const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } });
-  render(<QueryClientProvider client={queryClient}><Harness detail={detail} /></QueryClientProvider>);
-  return queryClient;
+  const rendered = render(<QueryClientProvider client={queryClient}><Harness detail={detail} /></QueryClientProvider>);
+  return { queryClient, ...rendered };
 }
 
 afterEach(() => vi.restoreAllMocks());
 
 describe('approval and rejection workflow', () => {
+  it('has no serious automated accessibility violations in decision dialogs', async () => {
+    const { container } = renderWorkflow();
+    fireEvent.click(screen.getByRole('button', { name: 'Approve' }));
+    await assertNoSeriousAccessibilityViolations(container);
+    fireEvent.click(screen.getByRole('button', { name: 'Cancel' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Reject' }));
+    await assertNoSeriousAccessibilityViolations(container);
+  });
   it('gates approval from the server status while allowing warnings-only approval', () => {
     renderWorkflow();
     expect(screen.getByRole('button', { name: 'Approve' })).toBeEnabled();
@@ -85,7 +94,7 @@ describe('approval and rejection workflow', () => {
     let resolveApproval: ((value: InvoiceDetailDto) => void) | undefined;
     const approval = new Promise<InvoiceDetailDto>((resolve) => { resolveApproval = resolve; });
     const approve = vi.spyOn(invoiceApi, 'approve').mockReturnValue(approval);
-    const queryClient = renderWorkflow();
+    const { queryClient } = renderWorkflow();
     fireEvent.click(screen.getByRole('button', { name: 'Approve' }));
     const confirm = screen.getByRole('button', { name: 'Confirm approval' });
     fireEvent.click(confirm);

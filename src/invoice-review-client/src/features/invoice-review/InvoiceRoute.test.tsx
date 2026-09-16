@@ -1,9 +1,11 @@
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { render, screen, waitFor } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import { createMemoryRouter, RouterProvider } from 'react-router-dom';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { ConfidenceBand, FieldSource, InvoiceStatus, ValidationSeverity, type InvoiceDetailDto } from '../../api/generated/client';
 import { invoiceApi } from '../../api/invoiceApi';
+import { assertNoSeriousAccessibilityViolations } from '../../test/accessibility';
 import { confidenceLabel, formatDate, formatMoney, InvoiceRoute } from './InvoiceRoute';
 
 vi.mock('./PdfReviewPanel', () => ({ PdfReviewPanel: () => <section aria-label="Source invoice">PDF</section> }));
@@ -39,6 +41,16 @@ function renderRoute(detail = invoice) {
 afterEach(() => vi.restoreAllMocks());
 
 describe('invoice review foundation', () => {
+  it('has no serious automated accessibility violations in review and processing-failure states', async () => {
+    const review = renderRoute();
+    await screen.findByDisplayValue('001');
+    await assertNoSeriousAccessibilityViolations(review.container);
+    review.unmount();
+
+    const failure = renderRoute({ ...invoice, status: InvoiceStatus.ProcessingFailed, fields: null, currentValidation: null, processingFailure: { stage: 'aiExtraction', code: 'AI_TIMEOUT', message: 'Extraction timed out.', failedAt: '2026-09-15T10:02:00Z' } });
+    await screen.findByRole('alert');
+    await assertNoSeriousAccessibilityViolations(failure.container);
+  });
   it('preserves exact draft values and presents every editable group with metadata', async () => {
     renderRoute();
     await screen.findByDisplayValue('001');
@@ -59,6 +71,16 @@ describe('invoice review foundation', () => {
     await screen.findByText('Blocking error:');
     expect(screen.getByText('Warning:', { exact: false })).toBeInTheDocument();
     expect(screen.getByLabelText('Review summary')).toHaveTextContent('Extracted fields10Warnings1Blocking errors1Manual corrections2');
+  });
+
+  it('uses text labels and keyboard-operable summary links to reach blocking fields', async () => {
+    const user = userEvent.setup();
+    renderRoute();
+    const summaryLink = await screen.findByRole('button', { name: 'Go to invoiceNumber' });
+    await user.click(summaryLink);
+    expect(document.activeElement).toBe(screen.getByLabelText('Invoice number'));
+    expect(screen.getByText('Blocking error:', { exact: false })).toBeInTheDocument();
+    expect(screen.getByText('medium confidence (75%)')).toBeInTheDocument();
   });
 
   it('renders a safe persisted processing failure when there are no extracted fields', async () => {

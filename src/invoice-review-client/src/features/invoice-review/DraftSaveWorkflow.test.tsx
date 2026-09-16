@@ -54,6 +54,7 @@ describe('draft save workflow', () => {
     fireEvent.change(screen.getByLabelText('Supplier name'), { target: { value: 'Contoso' } });
     fireEvent.click(screen.getByRole('button', { name: 'Save draft' }));
     await screen.findByText(/Your edits have been kept/);
+    await waitFor(() => expect(document.activeElement).toBe(screen.getByRole('alert')));
     expect(screen.getByLabelText('Supplier name')).toHaveValue('Contoso');
     expect(screen.getByText('Current server version: 4')).toBeInTheDocument();
     const getInvoice = vi.spyOn(invoiceApi, 'getInvoice').mockResolvedValue({ ...invoice, draftVersion: 4 } as InvoiceDetailDto);

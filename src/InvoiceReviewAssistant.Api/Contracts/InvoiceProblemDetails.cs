@@ -13,19 +13,25 @@ public sealed class InvoiceProblemDetails : ProblemDetails
 
 public static class InvoiceProblems
 {
-    public static InvoiceProblemDetails Create(HttpContext context, int status, string code, string title, string detail,
-        IReadOnlyDictionary<string, string[]>? fields = null, int? currentVersion = null) => new()
-    {
-        Type = $"urn:invoice-review-assistant:problem:{ToKebabCase(code)}",
-        Title = title,
-        Status = status,
-        Detail = detail,
-        Instance = context.Request.Path,
-        Code = code,
-        CorrelationId = CorrelationIdMiddleware.GetCorrelationId(context),
-        Fields = fields,
-        CurrentVersion = currentVersion,
-    };
+    public static InvoiceProblemDetails Create(
+        HttpContext context,
+        int status,
+        string code,
+        string title,
+        string detail,
+        IReadOnlyDictionary<string, string[]>? fields = null,
+        int? currentVersion = null) => new()
+        {
+            Type = $"urn:invoice-review-assistant:problem:{ToKebabCase(code)}",
+            Title = title,
+            Status = status,
+            Detail = detail,
+            Instance = context.Request.Path,
+            Code = code,
+            CorrelationId = CorrelationIdMiddleware.GetCorrelationId(context),
+            Fields = fields,
+            CurrentVersion = currentVersion,
+        };
 
     public static IResult Unexpected(HttpContext context) => Results.Problem(Create(context, StatusCodes.Status500InternalServerError,
         "UNEXPECTED_ERROR", "An unexpected error occurred", "The request could not be completed. Try again."));
@@ -33,7 +39,9 @@ public static class InvoiceProblems
     private static string ToKebabCase(string value) => string.Join('-', value.Split('_', StringSplitOptions.RemoveEmptyEntries).Select(part => part.ToLowerInvariant()));
 }
 
-public sealed class CorrelationIdMiddleware(RequestDelegate next)
+public sealed class CorrelationIdMiddleware(
+    RequestDelegate next,
+    ILogger<CorrelationIdMiddleware> logger)
 {
     public const string HeaderName = "X-Correlation-ID";
 
@@ -43,7 +51,10 @@ public sealed class CorrelationIdMiddleware(RequestDelegate next)
         var correlationId = IsValid(candidate) ? candidate : Guid.CreateVersion7().ToString("N");
         context.Items[HeaderName] = correlationId;
         context.Response.Headers[HeaderName] = correlationId;
-        await next(context);
+        using (logger.BeginScope(new Dictionary<string, object> { ["CorrelationId"] = correlationId }))
+        {
+            await next(context);
+        }
     }
 
     public static string GetCorrelationId(HttpContext context) => context.Items.TryGetValue(HeaderName, out var value) && value is string correlationId

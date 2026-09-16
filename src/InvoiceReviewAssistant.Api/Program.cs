@@ -1,5 +1,6 @@
 using InvoiceReviewAssistant.Api.Contracts;
 using InvoiceReviewAssistant.Api.Controllers;
+using InvoiceReviewAssistant.Api.Hosting;
 using InvoiceReviewAssistant.Core.Ingestion;
 using InvoiceReviewAssistant.Core.Invoices;
 using InvoiceReviewAssistant.Infrastructure.Configuration;
@@ -23,6 +24,17 @@ using OpenAI.Responses;
 #pragma warning restore OPENAI001
 
 var builder = WebApplication.CreateBuilder(args);
+// The demonstration runs with the Production environment, while credentials still
+// belong in the per-user Secret Manager store rather than committed configuration.
+// Reapply environment/command-line providers so per-run isolation and explicit
+// launch arguments retain higher precedence than persistent user secrets.
+builder.Configuration
+    .AddUserSecrets<Program>(optional: true)
+    .AddEnvironmentVariables()
+    .AddCommandLine(args);
+ProductionHosting.ConfigureLoopbackEndpoint(builder.WebHost, builder.Configuration);
+builder.Logging.ClearProviders();
+builder.Logging.AddJsonConsole(options => options.IncludeScopes = true);
 
 builder.Services.AddSingleton(serviceProvider => Bind<StorageOptions>(serviceProvider.GetRequiredService<IConfiguration>()));
 builder.Services.AddSingleton(serviceProvider => Bind<UploadOptions>(serviceProvider.GetRequiredService<IConfiguration>()));
@@ -101,6 +113,9 @@ builder.Services.Configure<Microsoft.AspNetCore.Mvc.ApiBehaviorOptions>(options 
 builder.Services.AddProblemDetails();
 builder.Services.AddOpenApi();
 builder.Services.AddCors();
+builder.Services.AddSingleton<IPdfiumPreflight, PdfiumPreflight>();
+builder.Services.AddSingleton<IProductionStartupOperations, ProductionStartupOperations>();
+builder.Services.AddSingleton<IProductionStartupPreflight, ProductionStartupPreflight>();
 
 var app = builder.Build();
 var storage = app.Services.GetRequiredService<StorageOptions>();
@@ -122,6 +137,7 @@ if (!optionResult.IsValid)
 Directory.CreateDirectory(storage.RootPath);
 var contractGeneration = extraction.Profile == ExtractionProfile.ContractGeneration;
 app.UseMiddleware<CorrelationIdMiddleware>();
+app.UseMiddleware<SafeRequestDiagnosticsMiddleware>();
 app.UseExceptionHandler(exceptionApp => exceptionApp.Run(async context =>
 {
     var problem = ServerFailure(
@@ -136,16 +152,40 @@ app.UseExceptionHandler(exceptionApp => exceptionApp.Run(async context =>
         contentType: "application/problem+json",
         cancellationToken: context.RequestAborted);
 }));
-app.UseCors(policy => policy.WithOrigins(cors.DevelopmentOrigin).AllowAnyHeader().AllowAnyMethod());
-app.MapOpenApi();
+if (app.Environment.IsDevelopment())
+{
+    app.UseCors(policy => policy.WithOrigins(cors.DevelopmentOrigin).AllowAnyHeader().AllowAnyMethod());
+}
+
+if (app.Environment.IsDevelopment() || contractGeneration)
+{
+    app.MapOpenApi();
+}
 app.MapControllers();
 app.MapGet("/health", () => Results.Ok(new { status = "healthy" }));
 
+if (!app.Environment.IsDevelopment())
+{
+    app.Use(ProductionHosting.AddContentSecurityPolicy);
+    app.UseDefaultFiles();
+    app.UseStaticFiles(ProductionHosting.CreateStaticFileOptions());
+    // This is deliberately last: API and document routes must never be rewritten
+    // to the SPA entry point.
+    app.MapFallbackToFile("{*path:nonfile}", "index.html");
+}
+
 if (!contractGeneration)
 {
-    await using var scope = app.Services.CreateAsyncScope();
-    await scope.ServiceProvider.GetRequiredService<InvoiceDbContext>().Database.MigrateAsync();
-    await scope.ServiceProvider.GetRequiredService<IStartupStorageReconciler>().ReconcileAsync(CancellationToken.None);
+    if (app.Environment.IsDevelopment())
+    {
+        await using var scope = app.Services.CreateAsyncScope();
+        await scope.ServiceProvider.GetRequiredService<InvoiceDbContext>().Database.MigrateAsync();
+        await scope.ServiceProvider.GetRequiredService<IStartupStorageReconciler>().ReconcileAsync(CancellationToken.None);
+    }
+    else
+    {
+        await app.Services.GetRequiredService<IProductionStartupPreflight>().RunAsync(CancellationToken.None);
+    }
 }
 
 app.Run();

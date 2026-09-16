@@ -1,6 +1,6 @@
 import * as Dialog from '@radix-ui/react-dialog';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { useId, useRef, useState, type ChangeEvent } from 'react';
+import { useEffect, useId, useRef, useState, type ChangeEvent } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
   applyUploadMutation,
@@ -64,6 +64,10 @@ export function UploadInvoiceDialog({ api = invoiceApi }: UploadInvoiceDialogPro
       navigate(`/invoices/${encodeURIComponent(invoice.id)}`);
     },
   });
+
+  useEffect(() => {
+    if (upload.isError) inputRef.current?.focus();
+  }, [upload.isError]);
 
   function chooseFile(event: ChangeEvent<HTMLInputElement>) {
     const files = event.target.files;

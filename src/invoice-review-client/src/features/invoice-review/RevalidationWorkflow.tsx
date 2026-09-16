@@ -1,5 +1,5 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useFormContext } from 'react-hook-form';
 import { InvoiceStatus, ValidationSeverity, type InvoiceDetailDto, type InvoiceDraftInputDto, type InvoiceFieldKey, type ValidationResultDto } from '../../api/generated/client';
 import { applyInvoiceMutation, invoiceApi, invoiceQueryKeys, isInvoiceApiError } from '../../api/invoiceApi';
@@ -31,6 +31,7 @@ export function RevalidationWorkflow({ invoice }: { invoice: InvoiceDetailDto })
   const form = useFormContext<InvoiceDraftInputDto>();
   const [error, setError] = useState<string | null>(null);
   const [conflictVersion, setConflictVersion] = useState<number | null>(null);
+  const errorRef = useRef<HTMLDivElement>(null);
   const validate = useMutation({
     mutationFn: () => invoiceApi.validate(invoice.id, { expectedVersion: invoice.draftVersion }),
     onMutate: () => { setError(null); setConflictVersion(null); },
@@ -50,12 +51,13 @@ export function RevalidationWorkflow({ invoice }: { invoice: InvoiceDetailDto })
   const refetchCurrent = async () => {
     await queryClient.fetchQuery({ queryKey: invoiceQueryKeys.detail(invoice.id), queryFn: () => invoiceApi.getInvoice(invoice.id) });
   };
+  useEffect(() => { if (error) errorRef.current?.focus(); }, [error]);
   const disabled = validate.isPending || form.formState.isDirty || !canRevalidateInvoice(invoice.status);
   const disabledMessage = form.formState.isDirty ? 'Save your draft before revalidating.' : !canRevalidateInvoice(invoice.status) ? 'This invoice cannot be revalidated in its current status.' : null;
 
   return <section className="revalidation-workflow" aria-label="Revalidation controls">
     <Button type="button" disabled={disabled} onClick={() => validate.mutate()}>{validate.isPending ? 'Revalidating…' : 'Revalidate'}</Button>
     {disabledMessage ? <p role="status">{disabledMessage}</p> : null}
-    {error ? <div role="alert"><p>{error}</p>{conflictVersion !== null ? <><p>Current server version: {conflictVersion}</p><Button type="button" tone="secondary" onClick={() => void refetchCurrent()}>Refetch current record</Button></> : null}</div> : null}
+    {error ? <div ref={errorRef} role="alert" tabIndex={-1}><p>{error}</p>{conflictVersion !== null ? <><p>Current server version: {conflictVersion}</p><Button type="button" tone="secondary" onClick={() => void refetchCurrent()}>Refetch current record</Button></> : null}</div> : null}
   </section>;
 }

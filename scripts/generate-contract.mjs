@@ -24,9 +24,15 @@ function run(command, args, options = {}) {
   });
 }
 
-const api = spawn('dotnet', ['run', '--no-build', '--project', 'src/InvoiceReviewAssistant.Api', '--urls', `http://127.0.0.1:${port}`], {
+const api = spawn('dotnet', ['run', '--no-build', '--project', 'src/InvoiceReviewAssistant.Api'], {
   cwd: root,
-  env: { ...process.env, INVOICE_REVIEW_CONTRACT_GENERATION: 'true', ASPNETCORE_ENVIRONMENT: 'Production' },
+  env: {
+    ...process.env,
+    INVOICE_REVIEW_CONTRACT_GENERATION: 'true',
+    ASPNETCORE_ENVIRONMENT: 'Production',
+    Hosting__LoopbackAddress: '127.0.0.1',
+    Hosting__Port: port,
+  },
   stdio: 'ignore',
 });
 

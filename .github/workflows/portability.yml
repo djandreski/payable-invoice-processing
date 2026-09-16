@@ -1,0 +1,56 @@
+name: portability
+
+on:
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - 'src/**'
+      - 'tests/**'
+      - 'scripts/**'
+      - 'Directory.*'
+      - 'InvoiceReviewAssistant.sln'
+      - 'package*.json'
+
+jobs:
+  platform:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [windows-latest, macos-latest, ubuntu-latest]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '10.0.x'
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+      - name: Install Tesseract (Windows)
+        if: runner.os == 'Windows'
+        shell: pwsh
+        run: choco install tesseract --yes --no-progress
+      - name: Install Tesseract (macOS)
+        if: runner.os == 'macOS'
+        run: brew install tesseract
+      - name: Install Tesseract (Linux)
+        if: runner.os == 'Linux'
+        run: sudo apt-get update && sudo apt-get install --yes tesseract-ocr tesseract-ocr-eng
+      - name: Restore and build
+        shell: pwsh
+        run: |
+          npm run restore
+          npm run build
+      - name: Install Playwright Chromium
+        shell: pwsh
+        run: pwsh tests/InvoiceReviewAssistant.EndToEndTests/bin/Debug/net10.0/playwright.ps1 install chromium
+      - name: Mandatory deterministic suites
+        shell: pwsh
+        run: npm test
+      - name: Installed Tesseract smoke
+        shell: pwsh
+        run: pwsh ./scripts/test-real-providers.ps1 -Provider Tesseract
+      - name: Published startup and restart smoke
+        shell: pwsh
+        run: pwsh ./scripts/verify-platform.ps1

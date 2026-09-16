@@ -3,6 +3,7 @@ import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { AuditEventType, ConfidenceBand, DecisionKind, DocumentIntegrityStatus, FieldSource, InvoiceStatus, ValidationSeverity, type InvoiceDetailDto } from '../../api/generated/client';
 import * as invoiceApiModule from '../../api/invoiceApi';
+import { assertNoSeriousAccessibilityViolations } from '../../test/accessibility';
 import { CompletedInvoiceRecord, isTerminalInvoice } from './CompletedInvoiceRecord';
 
 function field(value: string | null, changes: Record<string, unknown> = {}) {
@@ -36,6 +37,12 @@ function renderRecord(invoice = completedInvoice) {
 afterEach(() => vi.restoreAllMocks());
 
 describe('completed invoice record', () => {
+  it('has no serious automated accessibility violations', async () => {
+    vi.spyOn(invoiceApiModule.invoiceApi, 'getHistory').mockResolvedValue(firstHistory as never);
+    const { container } = renderRecord();
+    await screen.findByRole('list', { name: 'Audit events' });
+    await assertNoSeriousAccessibilityViolations(container);
+  });
   it('renders approved records as complete immutable evidence, retaining warnings and originals', async () => {
     vi.spyOn(invoiceApiModule.invoiceApi, 'getHistory').mockResolvedValue(firstHistory as never);
     renderRecord();

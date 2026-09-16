@@ -48,7 +48,9 @@ describe('revalidation workflow', () => {
     vi.spyOn(invoiceApi, 'validate').mockRejectedValue(new InvoiceApiError({ status: 409, code: 'VALIDATION_STALE', title: 'Stale', detail: 'Stale validation.', fields: null, currentVersion: 3, correlationId: null }));
     renderWorkflow();
     fireEvent.click(screen.getByRole('button', { name: 'Revalidate' }));
-    expect(await screen.findByRole('alert')).toHaveTextContent('Your unsaved edits have been kept');
+    const alert = await screen.findByRole('alert');
+    expect(alert).toHaveTextContent('Your unsaved edits have been kept');
+    await waitFor(() => expect(document.activeElement).toBe(alert));
     expect(screen.getByText('Current server version: 3')).toBeInTheDocument();
     const getInvoice = vi.spyOn(invoiceApi, 'getInvoice').mockResolvedValue({ ...invoice, draftVersion: 3 } as InvoiceDetailDto);
     fireEvent.click(screen.getByRole('button', { name: 'Refetch current record' }));

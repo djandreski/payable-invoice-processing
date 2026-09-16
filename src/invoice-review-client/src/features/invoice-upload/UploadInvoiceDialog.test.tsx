@@ -5,6 +5,7 @@ import { MemoryRouter, Route, Routes, useLocation } from 'react-router-dom';
 import { describe, expect, it, vi } from 'vitest';
 import { InvoiceApiError, invoiceQueryKeys, type InvoiceApi } from '../../api/invoiceApi';
 import { InvoiceStatus, ProcessingFailureCode, ProcessingStage, type InvoiceDetailDto } from '../../api/generated/client';
+import { assertNoSeriousAccessibilityViolations } from '../../test/accessibility';
 import { UploadInvoiceDialog } from './UploadInvoiceDialog';
 
 const reviewableInvoice = { id: 'invoice-42', status: InvoiceStatus.ReviewRequired, processingFailure: null } as InvoiceDetailDto;
@@ -17,17 +18,22 @@ function Location() { return <p data-testid="location">{useLocation().pathname}<
 
 function renderDialog(upload = vi.fn().mockResolvedValue(reviewableInvoice)) {
   const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } });
-  render(
+  const rendered = render(
     <QueryClientProvider client={queryClient}>
       <MemoryRouter initialEntries={['/']}>
         <Routes><Route path="*" element={<><UploadInvoiceDialog api={{ upload } as Pick<InvoiceApi, 'upload'>} /><Location /></>} /></Routes>
       </MemoryRouter>
     </QueryClientProvider>,
   );
-  return { queryClient, upload };
+  return { queryClient, upload, ...rendered };
 }
 
 describe('UploadInvoiceDialog', () => {
+  it('has no serious automated accessibility violations while open', async () => {
+    const { container } = renderDialog();
+    await userEvent.click(screen.getByRole('button', { name: 'Upload invoice' }));
+    await assertNoSeriousAccessibilityViolations(container);
+  });
   it('supports replacement and explains empty or multiple file selections', async () => {
     const user = userEvent.setup();
     renderDialog();
@@ -71,6 +77,7 @@ describe('UploadInvoiceDialog', () => {
     await user.upload(screen.getByLabelText('Invoice PDF'), new File(['pdf'], 'large.pdf', { type: 'application/pdf' }));
     await user.click(screen.getByRole('button', { name: 'Upload invoice' }));
     await waitFor(() => expect(screen.getByRole('alert')).toHaveTextContent('File too large'));
+    await waitFor(() => expect(screen.getByLabelText('Invoice PDF')).toHaveFocus());
     expect(screen.getByRole('alert')).toHaveTextContent('PDF_SIZE_LIMIT_EXCEEDED');
     expect(screen.getByText('Selected: large.pdf')).toBeInTheDocument();
   });

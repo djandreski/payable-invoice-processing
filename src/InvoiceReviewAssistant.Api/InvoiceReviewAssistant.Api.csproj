@@ -14,4 +14,23 @@
     <PackageReference Include="Microsoft.AspNetCore.OpenApi" />
     <PackageReference Include="NSwag.MSBuild" PrivateAssets="all" />
   </ItemGroup>
+
+  <PropertyGroup>
+    <InvoiceReviewClientDirectory>$(MSBuildProjectDirectory)\..\invoice-review-client</InvoiceReviewClientDirectory>
+    <InvoiceReviewClientDistDirectory>$(InvoiceReviewClientDirectory)\dist</InvoiceReviewClientDistDirectory>
+  </PropertyGroup>
+
+  <Target Name="BuildInvoiceReviewClient" BeforeTargets="ComputeFilesToPublish">
+    <Exec Command="npm ci --no-audit --no-fund" WorkingDirectory="$(InvoiceReviewClientDirectory)" />
+    <Exec Command="npm run build" WorkingDirectory="$(InvoiceReviewClientDirectory)" />
+  </Target>
+
+  <Target Name="CopyInvoiceReviewClientToPublish" AfterTargets="Publish" DependsOnTargets="BuildInvoiceReviewClient">
+    <RemoveDir Directories="$(PublishDir)wwwroot" />
+    <ItemGroup>
+      <_InvoiceReviewClientFiles Include="$(InvoiceReviewClientDistDirectory)\**\*" />
+    </ItemGroup>
+    <Copy SourceFiles="@(_InvoiceReviewClientFiles)"
+          DestinationFiles="@(_InvoiceReviewClientFiles->'$(PublishDir)wwwroot\%(RecursiveDir)%(Filename)%(Extension)')" />
+  </Target>
 </Project>

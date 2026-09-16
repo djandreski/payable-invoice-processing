@@ -26,7 +26,7 @@
 * { box-sizing: border-box; }
 body { min-width: 320px; min-height: 100vh; margin: 0; background: #f7f4ee; }
 button, input, select, textarea { font: inherit; }
-button:focus-visible, a:focus-visible { outline: 3px solid var(--focus-ring); outline-offset: 3px; }
+button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-visible, summary:focus-visible { outline: 3px solid var(--focus-ring); outline-offset: 3px; }
 
 .app-frame { min-height: 100vh; }
 .app-header { background: var(--ink-950); border-bottom: 1px solid #253452; }
@@ -115,7 +115,8 @@ button:focus-visible, a:focus-visible { outline: 3px solid var(--focus-ring); ou
 .review-field textarea { min-height: 5.5rem; resize: vertical; }
 .field-metadata { display: flex; flex-wrap: wrap; gap: .4rem .7rem; color: var(--slate-600); font-size: .78rem; }
 .confidence-badge { display: inline-flex; width: fit-content; border: 1px solid currentColor; border-radius: 999px; padding: .08rem .45rem; font-weight: 700; }
-.confidence-badge--high { color: var(--emerald-700); }.confidence-badge--medium { color: var(--amber-700); }.confidence-badge--low, .confidence-badge--unknown { color: var(--red-700); }
+.confidence-badge--high { color: var(--emerald-700); }.confidence-badge--medium, .confidence-badge--low { color: var(--amber-700); }.confidence-badge--unknown { color: var(--ink-700); }
 .correction-disclosure { color: var(--ink-900); font-weight: 700; }.system-metadata { margin: 0; color: var(--slate-600); font-size: .85rem; }
 @media (max-width: 48rem) { .review-split-layout { flex-direction: column; } }
 @media (max-width: 40rem) { .review-summary dl, .review-group { grid-template-columns: 1fr; } }
+@media (max-width: 30rem) { .dialog-actions { align-items: stretch; flex-direction: column-reverse; } .dialog-actions .button { width: 100%; } .decision-workflow__actions, .draft-save-workflow, .revalidation-workflow { align-items: stretch; flex-direction: column; } }

@@ -1,5 +1,5 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import type { FieldPath, UseFormReturn } from 'react-hook-form';
 import { useBlocker } from 'react-router-dom';
 import * as Dialog from '@radix-ui/react-dialog';
@@ -74,6 +74,7 @@ export function DraftSaveWorkflow({ invoice, form }: DraftSaveWorkflowProps) {
   const queryClient = useQueryClient();
   const [conflictVersion, setConflictVersion] = useState<number | null>(null);
   const [saveError, setSaveError] = useState<string | null>(null);
+  const errorRef = useRef<HTMLDivElement>(null);
   const fieldErrors = collectErrorMessages(form.formState.errors);
   useDraftUnloadGuard(form.formState.isDirty);
 
@@ -104,13 +105,15 @@ export function DraftSaveWorkflow({ invoice, form }: DraftSaveWorkflowProps) {
     await queryClient.fetchQuery({ queryKey: ['invoices', 'detail', invoice.id], queryFn: () => invoiceApi.getInvoice(invoice.id) });
   };
 
+  useEffect(() => { if (saveError) errorRef.current?.focus(); }, [saveError]);
+
   return <section className="draft-save-workflow" aria-label="Draft save controls">
     <DraftNavigationGuard isDirty={form.formState.isDirty} isSaving={save.isPending} />
     <Button type="submit" disabled={save.isPending} onClick={form.handleSubmit((draft) => save.mutate(draft))}>
       {save.isPending ? 'Saving draft…' : 'Save draft'}
     </Button>
     {form.formState.isDirty ? <p role="status">You have unsaved changes.</p> : <p role="status">All changes are saved.</p>}
-    {saveError ? <div role="alert"><p>{saveError}</p>
+    {saveError ? <div ref={errorRef} role="alert" tabIndex={-1}><p>{saveError}</p>
       {conflictVersion !== null ? <><p>Current server version: {conflictVersion}</p><Button type="button" tone="secondary" onClick={() => void refetchCurrent()}>Refetch current record</Button></> : null}
     </div> : null}
     {fieldErrors.length ? <ul aria-label="Draft field errors">{fieldErrors.map((message, index) => <li key={`${message}-${index}`}>{message}</li>)}</ul> : null}

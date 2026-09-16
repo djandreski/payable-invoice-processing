@@ -54,3 +54,5 @@ local-data/
 *.prompt.json
 *.response.json
 *.provider.json
+
+.artifacts/

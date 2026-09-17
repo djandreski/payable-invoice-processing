@@ -9,6 +9,17 @@ namespace InvoiceReviewAssistant.IntegrationTests.Ocr;
 
 public sealed class TesseractPreflightServiceTests
 {
+    [Theory]
+    [InlineData("tesseract 5.4.1", true)]
+    [InlineData("tesseract v5.5.3.20260724", true)]
+    [InlineData("tesseract 4.1.0", false)]
+    public void Detects_tesseract_major_version_five_with_optional_v_prefix(
+        string versionOutput,
+        bool expected)
+    {
+        Assert.Equal(expected, TesseractPreflightService.IsTesseractVersion5(versionOutput, ""));
+    }
+
     [Fact]
     public async Task Verifies_tesseract_5_and_configured_language_with_safe_structured_calls()
     {

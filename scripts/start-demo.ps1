@@ -22,6 +22,8 @@ if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
 $env:ASPNETCORE_ENVIRONMENT = 'Production'
 $env:Hosting__LoopbackAddress = $LoopbackAddress
 $env:Hosting__Port = "$Port"
+$baseUri = [UriBuilder]::new('http', $LoopbackAddress, $Port).Uri.AbsoluteUri
+Write-Host "Invoice Review Assistant starting at $baseUri" -ForegroundColor Green
 Push-Location $output
 try {
     & dotnet (Join-Path $output 'InvoiceReviewAssistant.Api.dll')

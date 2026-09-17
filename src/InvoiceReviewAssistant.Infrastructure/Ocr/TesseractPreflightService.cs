@@ -85,8 +85,18 @@ public sealed class TesseractPreflightService : IOcrPreflightService
         var firstLine = string.Concat(stdout, "\n", stderr)
             .Split(new[] { '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)
             .FirstOrDefault();
-        return firstLine is not null &&
-               firstLine.StartsWith("tesseract 5.", StringComparison.OrdinalIgnoreCase);
+        if (firstLine is null || !firstLine.StartsWith("tesseract ", StringComparison.OrdinalIgnoreCase))
+        {
+            return false;
+        }
+
+        var versionText = firstLine["tesseract ".Length..].Trim();
+        if (versionText.StartsWith("v", StringComparison.OrdinalIgnoreCase))
+        {
+            versionText = versionText[1..].TrimStart();
+        }
+
+        return Version.TryParse(versionText, out var version) && version.Major == 5;
     }
 
     internal static bool ContainsLanguage(string stdout, string language) =>

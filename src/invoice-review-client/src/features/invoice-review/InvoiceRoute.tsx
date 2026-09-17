@@ -49,10 +49,17 @@ function ReviewField({ definition, validationResults }: { definition: FieldDefin
     <label htmlFor={definition.name}>{definition.label}</label>
     <input id={definition.name} type={definition.type ?? 'text'} className={isMoney ? 'numeric-value' : undefined} aria-invalid={results.some((result) => result.severity === ValidationSeverity.Error) || undefined} aria-describedby={results.length ? resultId : undefined} {...register(definition.name)} />
     <FieldMetadata field={definition.field} isDate={isDate} isMoney={isMoney} />
-    {results.length ? <ul id={resultId} className="field-validation-results" aria-label={`${definition.label} validation`}>
-      {results.map((result, index) => <li key={`${result.code}-${index}`} className={`validation-result validation-result--${result.severity}`}><strong>{result.severity === ValidationSeverity.Error ? 'Blocking error' : 'Warning'} ({result.code}):</strong> {result.message}</li>)}
-    </ul> : null}
   </div>;
+}
+function FieldValidationMessages({ definition, validationResults }: { definition: FieldDefinition; validationResults: ValidationResultDto[] }) {
+  const results = validationResults.filter((result) => result.fields.some((field) => validationFieldPaths[field] === definition.name));
+  if (!results.length) return null;
+  return <ul id={`${definition.name}-validation`} className="field-validation-results" aria-label={`${definition.label} validation`}>
+    {results.map((result, index) => <li key={`${result.code}-${index}`} className={`validation-result validation-result--${result.severity}`}><strong>{result.severity === ValidationSeverity.Error ? 'Blocking error' : 'Warning'} ({result.code}):</strong> {result.message}</li>)}
+  </ul>;
+}
+function ReviewFields({ definitions, validationResults }: { definitions: FieldDefinition[]; validationResults: ValidationResultDto[] }) {
+  return <>{definitions.map((definition) => <ReviewField key={definition.name} definition={definition} validationResults={validationResults} />)}{definitions.map((definition) => <FieldValidationMessages key={`${definition.name}-validation`} definition={definition} validationResults={validationResults} />)}</>;
 }
 function ReviewGroup({ children, title }: { children: ReactNode; title: string }) {
   return <fieldset className="review-group"><legend>{title}</legend>{children}</fieldset>;
@@ -70,10 +77,10 @@ export function ReviewForm({ invoice }: { invoice: InvoiceDetailDto }) {
   const dates: FieldDefinition[] = [{ label: 'Invoice date', name: 'datesAndTerms.invoiceDate', field: fields.datesAndTerms.invoiceDate, type: 'date' }, { label: 'Due date', name: 'datesAndTerms.dueDate', field: fields.datesAndTerms.dueDate, type: 'date' }, { label: 'Payment terms', name: 'datesAndTerms.paymentTerms', field: fields.datesAndTerms.paymentTerms }];
   const amounts: FieldDefinition[] = [{ label: 'Currency', name: 'amounts.currency', field: fields.amounts.currency }, { label: 'Subtotal', name: 'amounts.subtotal', field: fields.amounts.subtotal }, { label: 'Tax amount', name: 'amounts.taxAmount', field: fields.amounts.taxAmount }, { label: 'Total', name: 'amounts.total', field: fields.amounts.total }];
   return <FormProvider {...form}><form className="review-form" aria-label="Invoice draft" onSubmit={(event) => event.preventDefault()}>
-    <ReviewGroup title="Supplier">{supplier.map((definition) => <ReviewField key={definition.name} definition={definition} validationResults={validationResults} />)}</ReviewGroup>
-    <ReviewGroup title="Reference">{reference.map((definition) => <ReviewField key={definition.name} definition={definition} validationResults={validationResults} />)}</ReviewGroup>
-    <ReviewGroup title="Dates and terms">{dates.map((definition) => <ReviewField key={definition.name} definition={definition} validationResults={validationResults} />)}<p className="system-metadata">Normalized payment-term days: {fields.datesAndTerms.normalizedPaymentTermsDays ?? 'Not available'} (derived by the system)</p></ReviewGroup>
-    <ReviewGroup title="Amounts">{amounts.map((definition) => <ReviewField key={definition.name} definition={definition} validationResults={validationResults} />)}</ReviewGroup>
+    <ReviewGroup title="Supplier"><ReviewFields definitions={supplier} validationResults={validationResults} /></ReviewGroup>
+    <ReviewGroup title="Reference"><ReviewFields definitions={reference} validationResults={validationResults} /></ReviewGroup>
+    <ReviewGroup title="Dates and terms"><ReviewFields definitions={dates} validationResults={validationResults} /><p className="system-metadata">Normalized payment-term days: {fields.datesAndTerms.normalizedPaymentTermsDays ?? 'Not available'} (derived by the system)</p></ReviewGroup>
+    <ReviewGroup title="Amounts"><ReviewFields definitions={amounts} validationResults={validationResults} /></ReviewGroup>
     <ReviewGroup title="Review information"><div className="review-field"><label htmlFor="reviewNotes">Review notes</label><textarea id="reviewNotes" {...form.register('reviewNotes')} /></div></ReviewGroup>
     <DraftSaveWorkflow invoice={invoice} form={form} />
     <RevalidationWorkflow invoice={invoice} />

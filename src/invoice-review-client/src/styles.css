@@ -103,7 +103,7 @@ button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible
 .validation-result--warning { border-color: var(--amber-700); background: #fff8e8; }
 .validation-result code { display: block; overflow-wrap: anywhere; margin-top: .5rem; color: var(--ink-700); font-size: .78rem; }
 .validation-field-link { display: block; padding: 0; border: 0; margin-top: .45rem; background: transparent; color: var(--blue-700); cursor: pointer; font: inherit; font-weight: 700; text-decoration: underline; }
-.field-validation-results { display: grid; gap: .4rem; padding: 0; margin: 0; list-style: none; }.field-validation-results .validation-result { margin: 0; }
+.field-validation-results { display: grid; grid-column: 1 / -1; gap: .4rem; padding: 0; margin: 0; list-style: none; }.field-validation-results .validation-result { margin: 0; }
 .review-field--invalid input { border-color: var(--red-700); }
 .processing-failure { border-left: 4px solid var(--red-700); }
 .review-form { display: grid; gap: 1rem; }
